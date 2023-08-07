@@ -1,0 +1,115 @@
+# Step 1: Login
+    URL: http://localhost:6810/myapi/login?sender=<int_id>
+    Servlet: UserAuth
+    Headers: (for connecting to db)
+        user: <database username>
+        password: <database password>
+        dbname: <database SID>
+    Query Parameters:
+        sender: <int_id>
+    Response:
+        400 "Did not provide a valid User ID"
+            - missing query "sender"
+            - sent alphanumeric characters through "sender"
+        400 "Missing headers"
+            - missing one or more header parameters
+        400 "Invalid credentials"
+            - wrong database credentials in headers
+        400 "The User ID does not exist"
+            - the "sender" does not exist in the database
+        200 JSON String
+            - all okay
+
+# Step 2: Send transaction info
+    URL: http://localhost:6810/myapi/tran_info?type=<int_type>
+    Servlet: TransactionInformation
+        Headers: not needed
+        Query Parameters:
+            type: <int_type>
+        Response:
+            400 "Did not provide a valid transaction type"
+                - missing query parameter "type"
+                - sent alphanumeric characters
+                - "type" does not exist in the database
+            403 "WARNING"
+                - user account is locked/frozen
+            403 "User not logged in"
+                - Skipped Step 1
+            200 JSON String
+                - all okay
+
+# Step 3: Send id to transact to
+    URL: http://localhost:6810/myapi/send_to?id=<int_id>&provider=<provider>&number=<number>
+    Servlet: TransactionInformation
+        Headers: not needed
+        Query Parameters:
+            id: <int_id> (not required for mobile recharge)
+            provider: "airtel", "robi" or "grameenphone" (for mobile recharge only)
+            number: an 10-digit number starting from 1 (for mobile recharge only)
+        Response:
+            400 "Did not provide a valid Recipient ID"
+                - missing query parameter "id"
+                - sent alphanumeric characters
+                - "id" does not exist in the database
+            400 "Did not send a supported provider"
+                - provider not supported by the system (for mobile recharge only)
+            400 "Did not send a valid number"
+                - invalid mobile number  (for mobile recharge only)
+            400 "Transaction not allowed"
+                - receiver account type does not match the type defined in the database
+            403 "User not logged in"
+                - Skipped Step 1
+            400 "Did not choose a transaction type"
+                - skipped Step 2
+            200 "Transaction allowed"
+                - all okay
+
+# Step 4: send transaction amount
+    URL: http://localhost:6810/myapi/send?amount=<double>
+    Servlet: Amount
+        Headers: not needed
+        Query Parameters:
+            amount: <double>
+        Response:
+            403 "User not logged in"
+                - Skipped Step 1
+            400 "Did not choose a transaction type"
+                - skipped Step 2
+            400 "Did not choose any Recipient"
+                - skipped step 3
+            400 "Please send a valid amount that is greater than 0"
+                - missing query parameter "amount"
+                - sent alphanumeric characters
+                - sent "amount"=0
+            403 "Insufficient Balance"
+                - "amount" is greater than the account balance
+            200 "Transaction allowed"
+                - all okay
+
+# Step 5: confirm and process transaction
+    URL: http://localhost:6810/myapi/send?confirm=<string>
+    Servlet: ProcessTransaction
+        Headers: not needed
+        Query Parameters:
+            confirm: "yes", everything else
+        Response:
+            403 "User not logged in"
+                - Skipped Step 1
+            400 "Did not choose a transaction type"
+                - skipped Step 2
+            400 "Did not choose any Recipient"
+                - skipped step 3
+            400 ""Did not set an amount to be transacted""
+                - skipped 4
+            200 "Did not confirm transaction"
+                - confirm != "yes"
+            500 "Could not process transaction"
+                - internal database error
+                - recipient's balance exceeded max limit after adding amount
+            102 "Processing"
+                - performing database operations
+            200 "Transaction completed"
+                - all okay
+
+
+
