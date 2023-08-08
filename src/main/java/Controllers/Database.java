@@ -24,18 +24,16 @@ public class Database {
         insert = new InsertIntoDB(conn);
     }
 
-    public static boolean connectToDatabase(AuthHeader auth) {
+    public static void connectToDatabase(AuthHeader auth) {
         try {
             String jdbcClassName = "oracle.jdbc.driver.OracleDriver";
             db = Database.getInstance(jdbcClassName, auth.getURL());
             System.out.println("getInstance");
             db.setAutoCommit(false);
             System.out.println("connected to db");
-            return true;
         } catch (SQLException | NullPointerException s) {
             System.out.println(s);
             System.out.println("failed to connect to db");
-            return false;
         }
 
     }
@@ -80,11 +78,6 @@ public class Database {
         System.out.println();
         System.out.println("Disconnecting from the database...");
         conn.close();
-        db = null;
-    }
-
-    public static void closeDB() throws SQLException {
-        db.close();
         db = null;
     }
 

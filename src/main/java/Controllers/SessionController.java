@@ -20,12 +20,6 @@ public class SessionController {
         }
     }
 
-    public static String getSessionID(int initiator) {
-        GetFromDB getter = Database.getGetter();
-        Session session = getter.getLastSession(initiator);
-        return session.getSession_id();
-    }
-
     public static boolean updateLastResponse(String sessionID, String value) {
         InsertIntoDB insert = Database.getInsert();
         try {
