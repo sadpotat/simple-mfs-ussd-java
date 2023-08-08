@@ -122,9 +122,7 @@ public class SessionManager extends HttpServlet {
                 return;
             }
 
-            // when type is 'forward'
-            Transaction transaction;
-
+            // when type is 'forward', process request
             switch (resStr){
                 case "/balance":
                     TransactionController.sendBalance(sessionID, initiator, out);
@@ -134,6 +132,23 @@ public class SessionManager extends HttpServlet {
                     TransactionController.sendStatement(sessionID, initiator, out);
                     break;
 
+                case "/info":
+                    TransactionController.sendTransactionInfo(sessionID, out);
+                    break;
+
+                case "/changepin":
+                    InsertIntoDB insert = Database.getInsert();
+                    insert.changePIN(sessionID, initiator, out);
+                    Database.commitChanges();
+                    break;
+
+                default:
+                    Responses.internalServerError(resp, out);
+            }
+
+            // requests that modify database
+            Transaction transaction;
+            switch (resStr){
                 case "/transact":
                     // Creating the transaction object
                     transaction = TransactionController.createTransactionOBJ(sessionID, initiator);
@@ -145,10 +160,6 @@ public class SessionManager extends HttpServlet {
                     Database.commitChanges();
                     out.println("Transaction Successful");
                     out.close();
-                    break;
-
-                case "/info":
-                    TransactionController.sendTransactionInfo(sessionID, out);
                     break;
 
                 case "/recharge":
@@ -163,13 +174,8 @@ public class SessionManager extends HttpServlet {
                     TransactionController.replaceProviderIDWithRechargedNumber(sessionID);
 
                     Database.commitChanges();
-                    out.println("Transaction Successful");
+                    out.println("Number Recharged Successfully");
                     out.close();
-
-                case "/changepin":
-                    InsertIntoDB insert = Database.getInsert();
-                    insert.changePIN(sessionID, initiator, out);
-                    Database.commitChanges();
                     break;
 
                 default:

@@ -6,7 +6,7 @@ public class MenuController {
 
     public static String getNextMenu(String prevResponse, String accountType, String input){
         // getting the next response menu name
-        GetFromDB getter = GetFromDB.getGetter();
+        GetFromDB getter = Database.getGetter();
         // first, check if there is a specific response for the entered input
         String nextResponse = getter.getNextResponseMenu(accountType, prevResponse, input);
         if(nextResponse.equals(""))
