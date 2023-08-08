@@ -1,6 +1,7 @@
 package Controllers;
 
 import Models.GetFromDB;
+import Models.Transaction;
 
 import java.io.PrintWriter;
 import java.sql.*;
@@ -90,6 +91,29 @@ public class TransactionController {
                 break;
         }
         out.close();
+    }
+
+    public static Transaction createTransactionOBJ(String sessionID, int initiator) {
+        // getting transaction info from log
+        int amount = Integer.parseInt(LogController.getLastNthInput(sessionID,3));
+        int receiver = Integer.parseInt(LogController.getLastNthInput(sessionID,4));
+        int tranType = Integer.parseInt(LogController.getLastNthInput(sessionID,5));
+
+        Models.Transaction transaction = new Models.Transaction();
+        GetFromDB getter = GetFromDB.getGetter();
+
+        // setting sender and receiver data from db
+        transaction.setSender(initiator);
+        transaction.setSenderObj(getter.getCustomer(initiator));
+        transaction.setReceiver(receiver);
+        transaction.setReceiverObj(getter.getCustomer(receiver));
+        transaction.setSessionID(sessionID);
+        transaction.setType(getter.getTTypeObjectFromDB(tranType));
+        transaction.setSessionID(sessionID);
+        transaction.setAmount(amount);
+        transaction.addCharges();
+
+        return transaction;
     }
 
     public void transact() throws SQLException {

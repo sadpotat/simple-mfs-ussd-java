@@ -28,14 +28,6 @@
     </servlet-mapping>
 
     <!--    Servlets for handling Transactions-->
-    <servlet>
-        <servlet-name>tranRef</servlet-name>
-        <servlet-class>TransactionServlets.Transaction</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>tranRef</servlet-name>
-        <url-pattern>/transact</url-pattern>
-    </servlet-mapping>
 
     <servlet>
         <servlet-name>recharge</servlet-name>

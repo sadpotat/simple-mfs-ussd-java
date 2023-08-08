@@ -1,7 +1,9 @@
 package Models;
 
+import Controllers.LogController;
 import Controllers.TransactionController;
 
+import java.io.PrintWriter;
 import java.sql.SQLException;
 
 public class Transaction {
@@ -96,5 +98,45 @@ public class Transaction {
         System.out.println(amount);
         System.out.println(senderObj.getBalance());
         return (amount < senderObj.getBalance());
+    }
+
+    public boolean isAllowed(PrintWriter out) {
+        // verifying if the user can make transactions
+        if (!receiverObj.getStatus().equals("ACTIVE")){
+            out.println("Cannot make transactions, your account is " + senderObj.getStatus());
+            out.close();
+            return false;
+        }
+
+        // verifying PIN
+        int hash = Integer.parseInt(LogController.getLastNthInput(sessionID,1));
+        if (!TransactionController.verifyPIN(sender, hash)) {
+            out.println("Wrong PIN");
+            out.close();
+            return false;
+        }
+
+        // verifying that the recipient exists
+        if (receiverObj == null) {
+            out.println("Recipient is not a registered account");
+            out.close();
+            return false;
+        }
+
+        // checking if a transaction would be allowed
+        if (!accountTypesOkay()) {
+            out.println("Transaction not allowed");
+            out.close();
+            return false;
+        }
+
+        // checking if the amount can be transacted
+        if (!amountIsInBalance()){
+            out.println("Insufficient balance");
+            out.close();
+            return false;
+        }
+
+        return true;
     }
 }

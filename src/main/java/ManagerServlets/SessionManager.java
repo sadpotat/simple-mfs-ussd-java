@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.awt.dnd.DropTarget;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
@@ -134,10 +135,21 @@ public class SessionManager extends HttpServlet {
                     break;
 
                 case "/transact":
+                    // Creating the transaction object
+                    Models.Transaction transaction = TransactionController.createTransactionOBJ(sessionID, initiator);
 
+                    // transacting
+                    if (transaction.isAllowed(out))
+                        transaction.execute();
+
+                    Database.commitChanges();
+                    out.println("Transaction Successful");
+                    out.close();
 
                 case "/info":
-
+                    RequestDispatcher rd = req.getRequestDispatcher("/info");
+                    rd.forward(req, resp);
+                    break;
 
                 case "/recharge":
 
@@ -152,6 +164,7 @@ public class SessionManager extends HttpServlet {
                     Responses.internalServerError(resp, out);
             }
         } catch (Exception e){
+            Database.rollbackChanges();
             Responses.internalServerError(resp, out);
         }
     }
