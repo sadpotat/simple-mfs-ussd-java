@@ -8,11 +8,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.awt.dnd.DropTarget;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.ResultSet;
-import java.time.format.DateTimeFormatter;
 
 public class SessionManager extends HttpServlet {
     @Override
@@ -120,11 +117,14 @@ public class SessionManager extends HttpServlet {
         try {
             Response response = getter.getResponse(nextResponse);
             String resStr = response.getRes_str();
-            if (response.getType().equals("static")){
+            if (response.getType().equals("static")) {
                 Responses.sendResponse(resStr, out);
                 return;
             }
+
             // when type is 'forward'
+            Transaction transaction;
+
             switch (resStr){
                 case "/balance":
                     TransactionController.sendBalance(sessionID, initiator, out);
@@ -136,7 +136,7 @@ public class SessionManager extends HttpServlet {
 
                 case "/transact":
                     // Creating the transaction object
-                    Models.Transaction transaction = TransactionController.createTransactionOBJ(sessionID, initiator);
+                    transaction = TransactionController.createTransactionOBJ(sessionID, initiator);
 
                     // transacting
                     if (transaction.isAllowed(out))
@@ -145,14 +145,26 @@ public class SessionManager extends HttpServlet {
                     Database.commitChanges();
                     out.println("Transaction Successful");
                     out.close();
+                    break;
 
                 case "/info":
-                    RequestDispatcher rd = req.getRequestDispatcher("/info");
-                    rd.forward(req, resp);
+                    TransactionController.sendTransactionInfo(sessionID, out);
                     break;
 
                 case "/recharge":
+                    // Creating the transaction object
+                    transaction = TransactionController.createTransactionOBJForRecharge(sessionID, initiator);
 
+                    // transacting
+                    if (transaction.isAllowed(out))
+                        transaction.execute();
+
+                    // updating transaction log to show the number that was recharged
+                    TransactionController.replaceProviderIDWithRechargedNumber(sessionID);
+
+                    Database.commitChanges();
+                    out.println("Transaction Successful");
+                    out.close();
 
                 case "/changepin":
                     InsertIntoDB insert = InsertIntoDB.getInsert();

@@ -1,6 +1,7 @@
 package Controllers;
 
 import Models.GetFromDB;
+import Models.InsertIntoDB;
 import Models.Transaction;
 
 import java.io.PrintWriter;
@@ -93,6 +94,19 @@ public class TransactionController {
         out.close();
     }
 
+    public static void sendTransactionInfo(String sessionID, PrintWriter out) {
+        String reference = LogController.getLastNthInput(sessionID,1);
+        int amount = Integer.parseInt(LogController.getLastNthInput(sessionID,2));
+        int receiver = Integer.parseInt(LogController.getLastNthInput(sessionID,3));
+
+        // displaying response
+        out.println("Receiver: " + receiver +
+                "\nAmount: " + amount +
+                "\nReference: " + reference +
+                "\nEnter PIN: ");
+        out.close();
+    }
+
     public static Transaction createTransactionOBJ(String sessionID, int initiator) {
         // getting transaction info from log
         int amount = Integer.parseInt(LogController.getLastNthInput(sessionID,3));
@@ -100,6 +114,27 @@ public class TransactionController {
         int tranType = Integer.parseInt(LogController.getLastNthInput(sessionID,5));
 
         Models.Transaction transaction = new Models.Transaction();
+
+        initialise(transaction, sessionID, initiator, receiver, amount, tranType);
+
+        return transaction;
+    }
+
+
+    public static Transaction createTransactionOBJForRecharge(String sessionID, int initiator) throws SQLException {
+        // getting transaction info from log
+        int amount = Integer.parseInt(LogController.getLastNthInput(sessionID,3));
+        int tranType = Integer.parseInt(LogController.getLastNthInput(sessionID,7));
+        int receiver = TransactionController.getProviderAcc(sessionID);
+
+        Models.Transaction transaction = new Models.Transaction();
+
+        initialise(transaction, sessionID, initiator, receiver, amount, tranType);
+
+        return transaction;
+    }
+
+    private static void initialise(Transaction transaction, String sessionID, int initiator, int receiver, double amount, int tranType) {
         GetFromDB getter = GetFromDB.getGetter();
 
         // setting sender and receiver data from db
@@ -112,8 +147,25 @@ public class TransactionController {
         transaction.setSessionID(sessionID);
         transaction.setAmount(amount);
         transaction.addCharges();
+    }
 
-        return transaction;
+
+    public static int getProviderAcc(String sessionID) throws SQLException {
+        GetFromDB getter = GetFromDB.getGetter();
+
+        // getting provider information from db
+        String simType = Integer.parseInt(LogController.getLastNthInput(sessionID, 5))==1 ? "PREPAID": "POSTPAID";
+        String provider = LogController.getLastNthInput(sessionID, 6);
+
+        String providerName = getter.getProviderName(provider);
+        String name = providerName + "_" + simType;
+        return getter.getProviderID(name);
+    }
+
+    public static void replaceProviderIDWithRechargedNumber(String sessionID) throws SQLException {
+        int receiver = Integer.parseInt(LogController.getLastNthInput(sessionID,4));
+        InsertIntoDB insert = InsertIntoDB.getInsert();
+        insert.updateReceiverInTLog(sessionID, receiver);
     }
 
     public void transact() throws SQLException {

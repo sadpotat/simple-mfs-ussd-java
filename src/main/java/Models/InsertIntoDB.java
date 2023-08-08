@@ -12,6 +12,7 @@ public class InsertIntoDB {
     private final PreparedStatement createSessionPS;
     private final PreparedStatement insertIntoLogPS;
     private final PreparedStatement updatePINPS;
+    private final PreparedStatement updateReceiverinTLogPS;
     private static InsertIntoDB insert;
 
     public InsertIntoDB(Connection conn) throws SQLException {
@@ -20,10 +21,12 @@ public class InsertIntoDB {
         String createSessionQuery = "insert into session_data(session_id, sim) values(?, ?)";
         String insertIntoLogQuery = "insert into session_log(session_id, uinput, LAST_UPDATE) values (?, ?, CURRENT_TIMESTAMP)";
         String updatePINQuery = "update passwords set password=? where cus_id=? and password=?";
+        String updateReceiverInTLogQuery = "update transactions set receiver_id=? where session_id=?";
 
         createSessionPS = conn.prepareStatement(createSessionQuery);
         insertIntoLogPS = conn.prepareStatement(insertIntoLogQuery);
         updatePINPS = conn.prepareStatement(updatePINQuery);
+        updateReceiverinTLogPS = conn.prepareStatement(updateReceiverInTLogQuery);
     }
 
     public static InsertIntoDB getInstance(Connection connection){
@@ -89,5 +92,11 @@ public class InsertIntoDB {
         updatePIN(initiator, oldPIN, newPIN);
         out.println("Your PIN has been changed");
         out.close();
+    }
+
+    public void updateReceiverInTLog(String sessionID, int receiver) throws SQLException {
+        updateReceiverinTLogPS.setInt(1, receiver);
+        updateReceiverinTLogPS.setString(2, sessionID);
+        updateReceiverinTLogPS.executeUpdate();
     }
 }
