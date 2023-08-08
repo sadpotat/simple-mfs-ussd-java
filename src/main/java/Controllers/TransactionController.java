@@ -2,7 +2,9 @@ package Controllers;
 
 import Models.GetFromDB;
 
+import java.io.PrintWriter;
 import java.sql.*;
+import java.time.format.DateTimeFormatter;
 
 public class TransactionController {
     private final GetFromDB fetcher;
@@ -45,6 +47,49 @@ public class TransactionController {
         Statement statement = conn.createStatement();
         String getTransactionsQuery = "select type, receiver_id, amount, time from transactions where sender_id=" + initiator + " order by trans_number desc";
         return statement.executeQuery(getTransactionsQuery);
+    }
+
+    public static void sendBalance(String sessionID, int initiator, PrintWriter out) {
+        int hash = Integer.parseInt(LogController.getLastNthInput(sessionID,1));
+
+        // verifying PIN
+        if (!verifyPIN(initiator, hash)) {
+            out.println("Wrong PIN");
+            out.close();
+            return;
+        }
+
+        double balance = GetFromDB.getGetter().getBalance(initiator);
+        out.println("Current account balance: " + balance);
+        out.close();
+    }
+
+    public static void sendStatement(String sessionID, int initiator, PrintWriter out) throws SQLException {
+        // getting transaction data from the user's previous inputs
+        int hash = Integer.parseInt(LogController.getLastNthInput(sessionID,1));
+
+        // verifying PIN
+        if (!verifyPIN(initiator, hash)) {
+            out.println("Wrong PIN");
+            out.close();
+        }
+
+        // getting previous transactions
+        ResultSet rs = getPrevTransactions(initiator);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+        for(int i=0; i<10; i++){
+            if(rs.next())
+                out.println(rs.getTimestamp("time").toLocalDateTime().format(formatter) +
+                        ": " + rs.getString("type") +
+                        " - " + rs.getString("receiver_id") +
+                        " - " + rs.getString("amount"));
+            else
+            if (i==0)
+                out.println("No transaction history found");
+            else
+                break;
+        }
+        out.close();
     }
 
     public void transact() throws SQLException {

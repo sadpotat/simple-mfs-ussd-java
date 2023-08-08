@@ -1,5 +1,10 @@
 package Models;
 
+import Controllers.LogController;
+import Controllers.Responses;
+import Controllers.TransactionController;
+
+import java.io.PrintWriter;
 import java.sql.*;
 
 public class InsertIntoDB {
@@ -58,5 +63,31 @@ public class InsertIntoDB {
         updatePINPS.setInt(2, initiator);
         updatePINPS.setInt(3, oldPIN);
         updatePINPS.executeUpdate();
+    }
+
+    public void changePIN(String sessionID, int initiator, PrintWriter out) throws SQLException {
+        // getting transaction data from the user's previous inputs
+        int confirmPIN = Integer.parseInt(LogController.getLastNthInput(sessionID,1));
+        int newPIN = Integer.parseInt(LogController.getLastNthInput(sessionID,2));
+        int oldPIN = Integer.parseInt(LogController.getLastNthInput(sessionID,3));
+
+        // verifying PIN
+        if (!TransactionController.verifyPIN(initiator, oldPIN)) {
+            out.println("Wrong PIN");
+            out.close();
+            return;
+        }
+
+        // checking if the two PINs match
+        if (newPIN != confirmPIN){
+            out.println("The PINs do not match");
+            out.close();
+            return;
+        }
+
+        // updating pin
+        updatePIN(initiator, oldPIN, newPIN);
+        out.println("Your PIN has been changed");
+        out.close();
     }
 }

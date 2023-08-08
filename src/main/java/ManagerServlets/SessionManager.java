@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.ResultSet;
+import java.time.format.DateTimeFormatter;
 
 public class SessionManager extends HttpServlet {
     @Override
@@ -116,12 +118,39 @@ public class SessionManager extends HttpServlet {
         // sending next response
         try {
             Response response = getter.getResponse(nextResponse);
+            String resStr = response.getRes_str();
             if (response.getType().equals("static")){
-                Responses.sendResponse(response.getRes_str(), out);
+                Responses.sendResponse(resStr, out);
+                return;
             }
-            // when type is 'forward', forward request
-            RequestDispatcher rd = req.getRequestDispatcher(response.getRes_str());
-            rd.forward(req,resp);
+            // when type is 'forward'
+            switch (resStr){
+                case "/balance":
+                    TransactionController.sendBalance(sessionID, initiator, out);
+                    break;
+
+                case "/statement":
+                    TransactionController.sendStatement(sessionID, initiator, out);
+                    break;
+
+                case "/transact":
+
+
+                case "/info":
+
+
+                case "/recharge":
+
+
+                case "/changepin":
+                    InsertIntoDB insert = InsertIntoDB.getInsert();
+                    insert.changePIN(sessionID, initiator, out);
+                    Database.commitChanges();
+                    break;
+
+                default:
+                    Responses.internalServerError(resp, out);
+            }
         } catch (Exception e){
             Responses.internalServerError(resp, out);
         }
