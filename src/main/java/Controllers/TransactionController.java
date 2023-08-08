@@ -20,7 +20,7 @@ public class TransactionController {
     private final String transactionType;
 
     public TransactionController(int s, int r, double a, String id, String type) throws SQLException {
-        fetcher = GetFromDB.getGetter();
+        fetcher = Database.getGetter();
         sender = s;
         receiver = r;
         amount = a;
@@ -40,7 +40,7 @@ public class TransactionController {
     }
 
     public static boolean verifyPIN(int initiator, int hash) {
-        GetFromDB getter = GetFromDB.getGetter();
+        GetFromDB getter = Database.getGetter();
         return getter.accountPinExists(initiator,hash);
     }
 
@@ -61,7 +61,7 @@ public class TransactionController {
             return;
         }
 
-        double balance = GetFromDB.getGetter().getBalance(initiator);
+        double balance = Database.getGetter().getBalance(initiator);
         out.println("Current account balance: " + balance);
         out.close();
     }
@@ -135,7 +135,7 @@ public class TransactionController {
     }
 
     private static void initialise(Transaction transaction, String sessionID, int initiator, int receiver, double amount, int tranType) {
-        GetFromDB getter = GetFromDB.getGetter();
+        GetFromDB getter = Database.getGetter();
 
         // setting sender and receiver data from db
         transaction.setSender(initiator);
@@ -151,7 +151,7 @@ public class TransactionController {
 
 
     public static int getProviderAcc(String sessionID) throws SQLException {
-        GetFromDB getter = GetFromDB.getGetter();
+        GetFromDB getter = Database.getGetter();
 
         // getting provider information from db
         String simType = Integer.parseInt(LogController.getLastNthInput(sessionID, 5))==1 ? "PREPAID": "POSTPAID";
@@ -164,7 +164,7 @@ public class TransactionController {
 
     public static void replaceProviderIDWithRechargedNumber(String sessionID) throws SQLException {
         int receiver = Integer.parseInt(LogController.getLastNthInput(sessionID,4));
-        InsertIntoDB insert = InsertIntoDB.getInsert();
+        InsertIntoDB insert = Database.getInsert();
         insert.updateReceiverInTLog(sessionID, receiver);
     }
 

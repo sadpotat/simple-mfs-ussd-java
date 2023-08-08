@@ -9,7 +9,7 @@ public class LogController {
 
     public static boolean addToLog(String sessionID, String input){
         try {
-            InsertIntoDB insert = InsertIntoDB.getInsert();
+            InsertIntoDB insert = Database.getInsert();
             insert.insertIntoLog(sessionID, input);
             Database.commitChanges();
             return true;
@@ -21,7 +21,7 @@ public class LogController {
     }
 
     public static String getLastNthInput(String sessionID, int n) {
-        GetFromDB getter = GetFromDB.getGetter();
+        GetFromDB getter = Database.getGetter();
         try {
             return getter.getLastNthInputFromLog(sessionID, n);
         } catch (SQLException e) {

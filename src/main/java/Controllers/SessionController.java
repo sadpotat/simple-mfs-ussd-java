@@ -9,7 +9,7 @@ import java.sql.SQLException;
 public class SessionController {
     public static boolean createSession(int initiator) {
         String sessionID = Utils.createSessionID();
-        InsertIntoDB insert = InsertIntoDB.getInsert();
+        InsertIntoDB insert = Database.getInsert();
         try {
             insert.createSessionEntry(sessionID, initiator);
             Database.commitChanges();
@@ -21,13 +21,13 @@ public class SessionController {
     }
 
     public static String getSessionID(int initiator) {
-        GetFromDB getter = GetFromDB.getGetter();
+        GetFromDB getter = Database.getGetter();
         Session session = getter.getLastSession(initiator);
         return session.getSession_id();
     }
 
     public static boolean updateLastResponse(String sessionID, String value) {
-        InsertIntoDB insert = InsertIntoDB.getInsert();
+        InsertIntoDB insert = Database.getInsert();
         try {
             insert.enterIntoSessionString(sessionID, "last_resp", value);
             Database.commitChanges();
@@ -40,7 +40,7 @@ public class SessionController {
     }
 
     public static boolean updateLastInput(String sessionId, String input) {
-        InsertIntoDB insert = InsertIntoDB.getInsert();
+        InsertIntoDB insert = Database.getInsert();
         try {
             insert.enterIntoSessionString(sessionId, "last_input", input);
             Database.commitChanges();
@@ -50,11 +50,5 @@ public class SessionController {
             Database.rollbackChanges();
             return false;
         }
-    }
-
-    public static int getInputAsInt(String lastInput) {
-        if (Utils.isNumeric(lastInput) && lastInput.length()<2)
-            return Integer.parseInt(lastInput);
-        return -1;
     }
 }

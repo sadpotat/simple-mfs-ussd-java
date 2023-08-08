@@ -45,7 +45,7 @@ public class SessionManager extends HttpServlet {
         }
 
         // getting session data
-        GetFromDB getter = GetFromDB.getGetter();
+        GetFromDB getter = Database.getGetter();
         Session session = getter.getLastSession(initiator);
         String prevResponse = session.getLast_response();
         String sessionID = session.getSession_id();
@@ -167,7 +167,7 @@ public class SessionManager extends HttpServlet {
                     out.close();
 
                 case "/changepin":
-                    InsertIntoDB insert = InsertIntoDB.getInsert();
+                    InsertIntoDB insert = Database.getInsert();
                     insert.changePIN(sessionID, initiator, out);
                     Database.commitChanges();
                     break;

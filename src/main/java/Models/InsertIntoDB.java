@@ -1,7 +1,6 @@
 package Models;
 
 import Controllers.LogController;
-import Controllers.Responses;
 import Controllers.TransactionController;
 
 import java.io.PrintWriter;
@@ -13,7 +12,6 @@ public class InsertIntoDB {
     private final PreparedStatement insertIntoLogPS;
     private final PreparedStatement updatePINPS;
     private final PreparedStatement updateReceiverinTLogPS;
-    private static InsertIntoDB insert;
 
     public InsertIntoDB(Connection conn) throws SQLException {
         statement = conn.createStatement();
@@ -27,21 +25,6 @@ public class InsertIntoDB {
         insertIntoLogPS = conn.prepareStatement(insertIntoLogQuery);
         updatePINPS = conn.prepareStatement(updatePINQuery);
         updateReceiverinTLogPS = conn.prepareStatement(updateReceiverInTLogQuery);
-    }
-
-    public static InsertIntoDB getInstance(Connection connection){
-        if (insert==null) {
-            try {
-                insert = new InsertIntoDB(connection);
-            } catch (SQLException e) {
-                System.out.println("Could not instantiate InsertFromDB");
-            }
-        }
-        return insert;
-    }
-
-    public static InsertIntoDB getInsert() {
-        return insert;
     }
 
     public void createSessionEntry(String sessionID, int number) throws SQLException {

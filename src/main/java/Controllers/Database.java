@@ -12,13 +12,16 @@ public class Database {
     private static Connection conn = null;
     private static Database db;
 
+    private static GetFromDB getter;
+    private static InsertIntoDB insert;
+
 
     public Database(String className, String dbURL) throws ClassNotFoundException, SQLException {
         Class.forName(className);
 
         conn = DriverManager.getConnection(dbURL);
-        GetFromDB.getInstance(conn);
-        InsertIntoDB.getInstance(conn);
+        getter = new GetFromDB(conn);
+        insert = new InsertIntoDB(conn);
     }
 
     public static boolean connectToDatabase(AuthHeader auth) {
@@ -96,5 +99,19 @@ public class Database {
         }
     }
 
+    public static GetFromDB getGetter() {
+        return getter;
+    }
 
+    public static void setGetter(GetFromDB getter) {
+        Database.getter = getter;
+    }
+
+    public static InsertIntoDB getInsert() {
+        return insert;
+    }
+
+    public static void setInsert(InsertIntoDB insert) {
+        Database.insert = insert;
+    }
 }

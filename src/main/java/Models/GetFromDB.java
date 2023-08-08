@@ -7,7 +7,6 @@ public class GetFromDB {
     private final PreparedStatement getBalance;
     private final PreparedStatement getCustomerPS;
     private final PreparedStatement getTModeObj;
-    private final PreparedStatement getProviderPS;
     private final PreparedStatement getLastSessionPS;
     private final PreparedStatement getLastNthInputPS;
     private final PreparedStatement verifyPINPS;
@@ -16,7 +15,6 @@ public class GetFromDB {
     private final PreparedStatement getResponseStringPS;
     private final PreparedStatement getProviderNamePS;
     private final PreparedStatement getProviderIDPS;
-    private static GetFromDB getter;
 
     public GetFromDB(Connection conn) throws SQLException {
 
@@ -24,7 +22,6 @@ public class GetFromDB {
         String getBalanceQuery = "select * from balance where cus_id=?";
         String getCustomerQuery = "select * from customers where cus_id=?";
         String getTModeObjQuery = "select * from modes where option_no=?";
-        String getProviderQuery = "select * from recharge where provider_name=?";
         String getLastSessionQuery = "select * from session_data where sim=? order by last_update DESC";
         String getLastNthInputQuery = "select uinput from session_log where session_id=? order by last_update desc OFFSET ? ROWS FETCH NEXT 1 ROWS ONLY";
         String verifyPINQuery = "select * from passwords where cus_id=? and password=?";
@@ -38,7 +35,6 @@ public class GetFromDB {
         getBalance = conn.prepareStatement(getBalanceQuery);
         getCustomerPS = conn.prepareStatement(getCustomerQuery);
         getTModeObj = conn.prepareStatement(getTModeObjQuery);
-        getProviderPS = conn.prepareStatement(getProviderQuery);
         getLastSessionPS = conn.prepareStatement(getLastSessionQuery);
         getLastNthInputPS = conn.prepareStatement(getLastNthInputQuery);
         verifyPINPS = conn.prepareStatement(verifyPINQuery);
@@ -47,22 +43,6 @@ public class GetFromDB {
         getResponseStringPS = conn.prepareStatement(getResponseStringQuery);
         getProviderNamePS = conn.prepareStatement(getProviderNameQuery);
         getProviderIDPS = conn.prepareStatement(getProviderIDQuery);
-    }
-
-    public static GetFromDB getInstance(Connection connection){
-        if (getter==null) {
-            try {
-                getter = new GetFromDB(connection);
-            } catch (SQLException e) {
-                System.out.println("could not instantiate GetFromDB");
-                throw new RuntimeException(e);
-            }
-        }
-        return getter;
-    }
-
-    public static GetFromDB getGetter(){
-        return getter;
     }
 
     public double getBalance(int user) {
