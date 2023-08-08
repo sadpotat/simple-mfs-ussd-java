@@ -52,17 +52,6 @@ public class SessionController {
         }
     }
 
-    public static String getNextMenu(String account_type, String prev_menu, int input){
-        GetFromDB getter = GetFromDB.getGetter();
-        return getter.getNextResponseMenu(account_type, prev_menu, input);
-    }
-
-    // method overloading
-    public static String getNextMenu(String account_type, String prev_menu, String input){
-        GetFromDB getter = GetFromDB.getGetter();
-        return getter.getNextResponseMenu(account_type, prev_menu, input);
-    }
-
     public static int getInputAsInt(String lastInput) {
         if (Utils.isNumeric(lastInput) && lastInput.length()<2)
             return Integer.parseInt(lastInput);

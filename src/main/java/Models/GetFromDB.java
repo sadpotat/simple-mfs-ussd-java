@@ -157,19 +157,6 @@ public class GetFromDB {
         return rs.getString("uinput");
     }
 
-    public String getNextResponseMenu(String accountType, String prevMenu, int input) {
-        try{
-            getNextMenuPS.setString(1, accountType);
-            getNextMenuPS.setString(2, prevMenu);
-            getNextMenuPS.setInt(3, input);
-            rs = getNextMenuPS.executeQuery();
-            rs.next();
-            return rs.getString("next_response");
-        } catch (SQLException e) {
-            return "";
-        }
-    }
-
     //method overloading
     public String getNextResponseMenu(String accountType, String prevMenu, String input) {
         try{

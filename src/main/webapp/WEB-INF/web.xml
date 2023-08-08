@@ -9,16 +9,6 @@
         <url-pattern>/ussd</url-pattern>
     </servlet-mapping>
 
-
-    <servlet>
-        <servlet-name>menu</servlet-name>
-        <servlet-class>ManagerServlets.MasterMenu</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>menu</servlet-name>
-        <url-pattern>/menu</url-pattern>
-    </servlet-mapping>
-
     <servlet>
         <servlet-name>tranInfo</servlet-name>
         <servlet-class>TransactionServlets.TransactionInfo</servlet-class>
