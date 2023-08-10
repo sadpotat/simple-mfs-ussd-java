@@ -1,8 +1,6 @@
 package Controllers;
 
-import Models.GetFromDB;
 import Models.InsertIntoDB;
-import Models.Session;
 import Models.Transaction;
 
 import javax.servlet.http.HttpServletResponse;

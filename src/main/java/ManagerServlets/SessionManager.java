@@ -17,7 +17,7 @@ public class SessionManager extends HttpServlet {
         Database.connectToDatabase(auth);
     }
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Database db = Database.getDb();
         resp.setContentType("html/text");
         PrintWriter out = resp.getWriter();

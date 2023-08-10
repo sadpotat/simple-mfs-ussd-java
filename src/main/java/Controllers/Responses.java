@@ -11,12 +11,6 @@ public class Responses {
         out.close();
     }
 
-    public static void sessionTimedOut(HttpServletResponse resp, PrintWriter out) {
-        resp.setStatus(403);
-        out.println("Session Timed Out");
-        out.close();
-    }
-
     public static void sendResponse(String resStr, PrintWriter out) {
         String[] responses = resStr.split("__");
         for (String line: responses)
