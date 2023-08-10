@@ -133,12 +133,12 @@ public class SessionManager extends HttpServlet {
             }
 
             // when type is 'forward', process request
-            if (resStr.equals("/info")) {
-                TransactionController.sendTransactionInfo(sessionID, out);
-                return;
-            }
+//            if (resStr.equals("info")) {
+//                TransactionController.sendTransactionInfo(sessionID, out);
+//                return;
+//            }
 
-            serviceID = session.getServiceID().equals("none") ? serviceID : session.getServiceID();
+            serviceID = serviceID.equals("none") ? session.getServiceID(): serviceID;
             SessionController.processRequest(resp, out, initiator, sessionID, serviceID);
 
         } catch (Exception e){
