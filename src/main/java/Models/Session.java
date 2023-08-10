@@ -9,6 +9,8 @@ public class Session {
     private String last_response;
     private LocalDateTime last_update;
 
+    private String serviceID;
+
     public String getSession_id() {
         return session_id;
     }
@@ -47,5 +49,13 @@ public class Session {
 
     public void setSim(int sim) {
         this.sim = sim;
+    }
+
+    public String getServiceID() {
+        return serviceID;
+    }
+
+    public void setServiceID(String serviceID) {
+        this.serviceID = serviceID;
     }
 }

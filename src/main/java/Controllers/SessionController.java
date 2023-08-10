@@ -2,6 +2,8 @@ package Controllers;
 
 import Models.InsertIntoDB;
 import Models.Transaction;
+import Processes.TransactionProcess;
+import Services.AccInfoService;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
@@ -99,6 +101,19 @@ public class SessionController {
 
             default:
                 Responses.internalServerError(resp, out);
+        }
+    }
+
+    public static boolean updateServiceID(String sessionID, String serviceID) {
+        InsertIntoDB insert = Database.getInsert();
+        try {
+            insert.enterIntoSessionString(sessionID, "service_id", serviceID);
+            Database.commitChanges();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("failed to update serviceID");
+            Database.rollbackChanges();
+            return false;
         }
     }
 }

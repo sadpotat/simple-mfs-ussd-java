@@ -121,7 +121,7 @@ public class TransactionController {
     }
 
 
-    public static Transaction createTransactionOBJForRecharge(String sessionID, int initiator) throws SQLException {
+    public static Transaction createTransactionOBJForRecharge(String sessionID, int initiator){
         // getting transaction info from log
         int amount = Integer.parseInt(LogController.getLastNthInput(sessionID,3));
         int tranType = Integer.parseInt(LogController.getLastNthInput(sessionID,7));
@@ -150,16 +150,20 @@ public class TransactionController {
     }
 
 
-    public static int getProviderAcc(String sessionID) throws SQLException {
+    public static int getProviderAcc(String sessionID){
         GetFromDB getter = Database.getGetter();
 
         // getting provider information from db
         String simType = Integer.parseInt(LogController.getLastNthInput(sessionID, 5))==1 ? "PREPAID": "POSTPAID";
         String provider = LogController.getLastNthInput(sessionID, 6);
 
-        String providerName = getter.getProviderName(provider);
-        String name = providerName + "_" + simType;
-        return getter.getProviderID(name);
+        try {
+            String providerName = getter.getProviderName(provider);
+            String name = providerName + "_" + simType;
+            return getter.getProviderID(name);
+        } catch (SQLException e) {
+            return -1;
+        }
     }
 
     public static void replaceProviderIDWithRechargedNumber(String sessionID) throws SQLException {

@@ -84,16 +84,19 @@ public class SessionManager extends HttpServlet {
         String accType = user.getType();
 
         // getting the next response menu name
-        String nextResponse = MenuController.getNextMenu(prevResponse, accType, input);
+        NextResponse nextResponse = MenuController.getNextMenu(prevResponse, accType, input);
 
-        if (nextResponse.equals("")){
+        if (nextResponse==null){
             // handling errors
             Responses.internalServerError(resp, out);
             return;
         }
 
+        String nextMenu = nextResponse.getMenuNo();
+        String serviceID = nextResponse.getServiceID();
+
         // updating last response
-        if(!SessionController.updateLastResponse(sessionID, nextResponse)){
+        if(!SessionController.updateLastResponse(sessionID, nextMenu)){
             // handling errors
             Responses.internalServerError(resp, out);
             return;
@@ -101,6 +104,13 @@ public class SessionManager extends HttpServlet {
 
         // updating last input in session data
         if(!SessionController.updateLastInput(sessionID, input)){
+            // handling errors
+            Responses.internalServerError(resp, out);
+            return;
+        }
+
+        // updating serviceID if a service was chosen
+        if(!serviceID.equals("none") && !SessionController.updateServiceID(sessionID, serviceID)){
             // handling errors
             Responses.internalServerError(resp, out);
             return;
@@ -115,7 +125,7 @@ public class SessionManager extends HttpServlet {
 
         // sending next response
         try {
-            Response response = getter.getResponse(nextResponse);
+            Response response = getter.getResponse(nextMenu);
             String resStr = response.getRes_str();
             if (response.getType().equals("static")) {
                 Responses.sendResponse(resStr, out);
@@ -123,6 +133,11 @@ public class SessionManager extends HttpServlet {
             }
 
             // when type is 'forward', process request
+            if (resStr.equals("/info")) {
+                TransactionController.sendTransactionInfo(sessionID, out);
+                return;
+            }
+
             SessionController.processRequest(resp, out, initiator, sessionID, resStr);
 
         } catch (Exception e){

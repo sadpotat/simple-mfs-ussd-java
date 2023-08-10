@@ -10,7 +10,7 @@ public class GetFromDB {
     private final PreparedStatement getLastSessionPS;
     private final PreparedStatement getLastNthInputPS;
     private final PreparedStatement verifyPINPS;
-    private final PreparedStatement getNextMenuPS;
+    private final PreparedStatement getNextResponsePS;
     private final PreparedStatement getRegexPS;
     private final PreparedStatement getResponseStringPS;
     private final PreparedStatement getProviderNamePS;
@@ -25,7 +25,7 @@ public class GetFromDB {
         String getLastSessionQuery = "select * from session_data where sim=? order by last_update DESC";
         String getLastNthInputQuery = "select uinput from session_log where session_id=? order by last_update desc OFFSET ? ROWS FETCH NEXT 1 ROWS ONLY";
         String verifyPINQuery = "select * from passwords where cus_id=? and password=?";
-        String getNextMenuQuery = "select next_response from menu_routes where account_type=? and prev_response=? and uinput=?";
+        String getNextResponseQuery = "select next_response, service_id from menu_routes where account_type=? and prev_response=? and uinput=?";
         String getRegexQuery = "select regex_for_input, error_msg from menu_routes where prev_response=? fetch first 1 rows only";
         String getResponseStringQuery = "select res_str, type from responses where menu=?";
         String getProviderNameQuery = "select name from provider where menu=?";
@@ -38,7 +38,7 @@ public class GetFromDB {
         getLastSessionPS = conn.prepareStatement(getLastSessionQuery);
         getLastNthInputPS = conn.prepareStatement(getLastNthInputQuery);
         verifyPINPS = conn.prepareStatement(verifyPINQuery);
-        getNextMenuPS = conn.prepareStatement(getNextMenuQuery);
+        getNextResponsePS = conn.prepareStatement(getNextResponseQuery);
         getRegexPS = conn.prepareStatement(getRegexQuery);
         getResponseStringPS = conn.prepareStatement(getResponseStringQuery);
         getProviderNamePS = conn.prepareStatement(getProviderNameQuery);
@@ -110,6 +110,7 @@ public class GetFromDB {
             session.setLast_input(rs.getString("last_input"));
             session.setLast_response(rs.getString("last_resp"));
             session.setLast_update(rs.getTimestamp("last_update").toLocalDateTime());
+            session.setServiceID(rs.getString("service_id"));
         } catch (SQLException e) {
             System.out.println("Could not get Session object");
             session = null;
@@ -138,17 +139,20 @@ public class GetFromDB {
     }
 
     //method overloading
-    public String getNextResponseMenu(String accountType, String prevMenu, String input) {
+    public NextResponse getNextResponse(String accountType, String prevMenu, String input) {
+        NextResponse nextResponse = new NextResponse();
         try{
-            getNextMenuPS.setString(1, accountType);
-            getNextMenuPS.setString(2, prevMenu);
-            getNextMenuPS.setString(3, input);
-            rs = getNextMenuPS.executeQuery();
+            getNextResponsePS.setString(1, accountType);
+            getNextResponsePS.setString(2, prevMenu);
+            getNextResponsePS.setString(3, input);
+            rs = getNextResponsePS.executeQuery();
             rs.next();
-            return rs.getString("next_response");
+            nextResponse.setMenuNo(rs.getString("next_response"));
+            nextResponse.setServiceID(rs.getString("service_id"));
         } catch (SQLException e) {
-            return "";
+            nextResponse = null;
         }
+        return nextResponse;
     }
 
     public Regex getRegexString(String lastResponse) {
