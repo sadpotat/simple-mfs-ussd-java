@@ -2,8 +2,6 @@ package Controllers;
 
 import Models.InsertIntoDB;
 import Models.Transaction;
-import Processes.TransactionProcess;
-import Services.AccInfoService;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
@@ -49,28 +47,28 @@ public class SessionController {
         }
     }
 
-    public static void processRequest(HttpServletResponse resp, PrintWriter out, int initiator, String sessionID, String resStr) throws SQLException {
+    public static void processRequest(HttpServletResponse resp, PrintWriter out, int initiator, String sessionID, String serviceID) throws SQLException {
         Transaction transaction;
-        switch (resStr){
-            case "/balance":
+        switch (serviceID){
+            case "info_balance":
                 TransactionController.sendBalance(sessionID, initiator, out);
                 break;
 
-            case "/statement":
+            case "info_statement":
                 TransactionController.sendStatement(sessionID, initiator, out);
                 break;
 
-            case "/info":
-                TransactionController.sendTransactionInfo(sessionID, out);
-                break;
-
-            case "/changepin":
+            case "pin_change":
                 InsertIntoDB insert = Database.getInsert();
                 insert.changePIN(sessionID, initiator, out);
                 Database.commitChanges();
                 break;
 
-            case "/transact":
+            case "trns_cout":
+            case "trns_send":
+            case "trns_payt":
+            case "trns_bill":
+            case "trns_emi":
                 // Creating the transaction object
                 transaction = TransactionController.createTransactionOBJ(sessionID, initiator);
 
@@ -83,7 +81,7 @@ public class SessionController {
                 out.close();
                 break;
 
-            case "/recharge":
+            case "trns_recharge":
                 // Creating the transaction object
                 transaction = TransactionController.createTransactionOBJForRecharge(sessionID, initiator);
 

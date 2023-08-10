@@ -138,7 +138,8 @@ public class SessionManager extends HttpServlet {
                 return;
             }
 
-            SessionController.processRequest(resp, out, initiator, sessionID, resStr);
+            serviceID = session.getServiceID().equals("none") ? serviceID : session.getServiceID();
+            SessionController.processRequest(resp, out, initiator, sessionID, serviceID);
 
         } catch (Exception e){
             Database.rollbackChanges();
