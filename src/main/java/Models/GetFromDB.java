@@ -26,7 +26,7 @@ public class GetFromDB {
         String getLastNthInputQuery = "select uinput from session_log where session_id=? order by last_update desc OFFSET ? ROWS FETCH NEXT 1 ROWS ONLY";
         String verifyPINQuery = "select * from passwords where cus_id=? and password=?";
         String getNextMenuQuery = "select next_response from menu_routes where account_type=? and prev_response=? and uinput=?";
-        String getRegexQuery = "select regex_for_input from menu_routes where prev_response=? fetch first 1 rows only";
+        String getRegexQuery = "select regex_for_input, error_msg from menu_routes where prev_response=? fetch first 1 rows only";
         String getResponseStringQuery = "select res_str, type from responses where menu=?";
         String getProviderNameQuery = "select name from provider where menu=?";
         String getProviderIDQuery = "select cus_id from customers where name=?";
@@ -151,17 +151,18 @@ public class GetFromDB {
         }
     }
 
-    public String getRegexString(String lastResponse) {
+    public Regex getRegexString(String lastResponse) {
+        Regex regexObj = new Regex();
         try {
             getRegexPS.setString(1, lastResponse);
             rs = getRegexPS.executeQuery();
             rs.next();
-            return rs.getString("regex_for_input");
+            regexObj.setRegex(rs.getString("regex_for_input"));
+            regexObj.setError_msg(rs.getString("error_msg"));
         } catch (SQLException e) {
             System.out.println("Could not fetch regex");
-            return "";
         }
-
+        return regexObj;
     }
 
     public Response getResponse(String menuName) {

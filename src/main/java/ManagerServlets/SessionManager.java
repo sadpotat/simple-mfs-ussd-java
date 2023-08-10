@@ -3,7 +3,6 @@ package ManagerServlets;
 import Controllers.*;
 import Models.*;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -52,7 +51,9 @@ public class SessionManager extends HttpServlet {
 
         // verifying input
         // getting input regex from db
-        String regex = getter.getRegexString(prevResponse);
+        Regex regexObj = getter.getRegexString(prevResponse);
+        String regex = regexObj.getRegex();
+        String errorMsg = regexObj.getError_msg();
 
         // handling database errors
         if(regex.equals("")){
@@ -62,14 +63,13 @@ public class SessionManager extends HttpServlet {
 
         if(!input.matches(regex)){
             // send the last response again when regex does not match
-            out.println("Not a valid input, please try again");
+            out.println(errorMsg);
             Response response = getter.getResponse(prevResponse);
             if (response.getType().equals("static")){
                 Responses.sendResponse(response.getRes_str(), out);
+                return;
             }
-            // forwarding to servlet if the response is not a static string
-            RequestDispatcher rd = req.getRequestDispatcher(response.getRes_str());
-            rd.include(req, resp);
+            // ignoring response text for forward type responses
             return;
         }
 
@@ -123,67 +123,12 @@ public class SessionManager extends HttpServlet {
             }
 
             // when type is 'forward', process request
-            switch (resStr){
-                case "/balance":
-                    TransactionController.sendBalance(sessionID, initiator, out);
-                    break;
+            SessionController.processRequest(resp, out, initiator, sessionID, resStr);
 
-                case "/statement":
-                    TransactionController.sendStatement(sessionID, initiator, out);
-                    break;
-
-                case "/info":
-                    TransactionController.sendTransactionInfo(sessionID, out);
-                    break;
-
-                case "/changepin":
-                    InsertIntoDB insert = Database.getInsert();
-                    insert.changePIN(sessionID, initiator, out);
-                    Database.commitChanges();
-                    break;
-
-                default:
-                    Responses.internalServerError(resp, out);
-            }
-
-            // requests that modify database
-            Transaction transaction;
-            switch (resStr){
-                case "/transact":
-                    // Creating the transaction object
-                    transaction = TransactionController.createTransactionOBJ(sessionID, initiator);
-
-                    // transacting
-                    if (transaction.isAllowed(out))
-                        transaction.execute();
-
-                    Database.commitChanges();
-                    out.println("Transaction Successful");
-                    out.close();
-                    break;
-
-                case "/recharge":
-                    // Creating the transaction object
-                    transaction = TransactionController.createTransactionOBJForRecharge(sessionID, initiator);
-
-                    // transacting
-                    if (transaction.isAllowed(out))
-                        transaction.execute();
-
-                    // updating transaction log to show the number that was recharged
-                    TransactionController.replaceProviderIDWithRechargedNumber(sessionID);
-
-                    Database.commitChanges();
-                    out.println("Number Recharged Successfully");
-                    out.close();
-                    break;
-
-                default:
-                    Responses.internalServerError(resp, out);
-            }
         } catch (Exception e){
             Database.rollbackChanges();
             Responses.internalServerError(resp, out);
         }
     }
+
 }
