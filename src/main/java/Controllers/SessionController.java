@@ -53,17 +53,30 @@ public class SessionController {
     public static void processRequest(HttpServletResponse resp, PrintWriter out, int initiator, String sessionID, String serviceID) throws SQLException {
         switch (serviceID){
             case "info_balance":
-                TransactionController.sendBalance(sessionID, initiator, out);
+                SendBalance balance = new SendBalance(sessionID, initiator);
+                balance.initialiseFromLog();
+                if (balance.isAllowed(out)){
+                    balance.execute();
+                    balance.sendSuccessMessage(resp, out);
+                }
                 break;
 
             case "info_statement":
-                TransactionController.sendStatement(sessionID, initiator, out);
+                SendStatement miniStatement = new SendStatement(sessionID, initiator);
+                miniStatement.initialiseFromLog();
+                if (miniStatement.isAllowed(out)){
+                    miniStatement.execute();
+                    miniStatement.sendSuccessMessage(resp, out);
+                }
                 break;
 
             case "pin_change":
-                InsertIntoDB insert = Database.getInsert();
-                insert.changePIN(sessionID, initiator, out);
-                Database.commitChanges();
+                PINChange pinChange = new PINChange(sessionID, initiator);
+                pinChange.initialiseFromLog();
+                if (pinChange.isAllowed(out)){
+                    pinChange.execute();
+                    pinChange.sendSuccessMessage(resp, out);
+                }
                 break;
 
             case "trns_cout":
@@ -71,6 +84,7 @@ public class SessionController {
                 cout.initialiseFromLog();
                 if (cout.isAllowed(out)){
                     cout.execute();
+                    cout.sendSuccessMessage(resp, out);
                 }
                 break;
 
@@ -79,6 +93,7 @@ public class SessionController {
                 send.initialiseFromLog();
                 if (send.isAllowed(out)){
                     send.execute();
+                    send.sendSuccessMessage(resp, out);
                 }
                 break;
 
@@ -87,6 +102,7 @@ public class SessionController {
                 pay.initialiseFromLog();
                 if(pay.isAllowed(out)){
                     pay.execute();
+                    pay.sendSuccessMessage(resp, out);
                 }
                 break;
 
@@ -95,6 +111,7 @@ public class SessionController {
                 bill.initialiseFromLog();
                 if(bill.isAllowed(out)){
                     bill.execute();
+                    bill.sendSuccessMessage(resp, out);
                 }
                 break;
 
@@ -103,6 +120,7 @@ public class SessionController {
                 emi.initialiseFromLog();
                 if(emi.isAllowed(out)){
                     emi.execute();
+                    emi.sendSuccessMessage(resp, out);
                 }
                 break;
 
@@ -111,6 +129,7 @@ public class SessionController {
                 recharge.initialiseFromLog();
                 if(recharge.isAllowed(out)){
                     recharge.execute();
+                    recharge.sendSuccessMessage(resp, out);
                 }
                 break;
 

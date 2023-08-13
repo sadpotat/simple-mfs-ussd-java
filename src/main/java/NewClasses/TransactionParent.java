@@ -6,14 +6,16 @@ import Models.Customer;
 import Models.GetFromDB;
 import Models.TType;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.sql.*;
 
 abstract class TransactionParent {
+    protected int PIN;
     protected final GetFromDB getter;
-    protected final PreparedStatement insertTransaction;
-    protected final PreparedStatement updateSenderBalance;
-    protected final PreparedStatement updateReceiverBalance;
+    protected PreparedStatement insertTransaction;
+    protected PreparedStatement updateSenderBalance;
+    protected PreparedStatement updateReceiverBalance;
     protected final int sender;
     protected final Customer senderObj;
     protected int receiver;
@@ -23,33 +25,33 @@ abstract class TransactionParent {
     protected TType tType;
     protected String serviceID;
 
-    public TransactionParent(String session_id, int initiator) throws SQLException {
+    public TransactionParent(String session_id, int initiator) {
         sessionID = session_id;
         getter = Database.getGetter();
-        Connection conn = Database.getConnectionObject();
         sender = initiator;
         senderObj = getter.getCustomer(initiator);
+    }
+
+    // must be called before asking for PIN
+    abstract void initialiseFromLog() throws SQLException;
+
+    protected void updatefields(int rec, int amnt) throws SQLException {
+        receiver = rec;
+        receiverObj = getter.getCustomer(rec);
+        amount = amnt;
+        tType = getter.getTTypeObjectFromDB(serviceID);
+        addCharges();
 
         // query strings
         String addTranQuery = "insert into transactions (amount, sender_id, receiver_id, session_id, type, time) values (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)";
         String updateSenderQuery = "update balance set balance=(select balance from balance where cus_id=?)-? where cus_id=?";
         String updateReceiverQuery = "update balance set balance=(select balance from balance where cus_id=?)+? where cus_id=?";
 
+        Connection conn = Database.getConnectionObject();
         // initialising prepared statements
         insertTransaction = conn.prepareStatement(addTranQuery);
         updateSenderBalance = conn.prepareStatement(updateSenderQuery);
         updateReceiverBalance = conn.prepareStatement(updateReceiverQuery);
-    }
-
-    // must be called before asking for PIN
-    abstract void initialiseFromLog();
-
-    protected void updatefields(int rec, int amnt){
-        receiver = rec;
-        receiverObj = getter.getCustomer(rec);
-        amount = amnt;
-        tType = getter.getTTypeObjectFromDB(serviceID);
-        addCharges();
     }
 
     protected void addCharges() {
@@ -147,6 +149,12 @@ abstract class TransactionParent {
         updateReceiverBalance.setDouble(2, amount);
         updateReceiverBalance.setInt(3, receiver);
         updateReceiverBalance.executeUpdate();
+    }
+
+    public void sendSuccessMessage(HttpServletResponse resp, PrintWriter out){
+        resp.setStatus(200);
+        out.println("Transacted Successfully");
+        out.close();
     }
 
 }
