@@ -79,28 +79,11 @@ public class GetFromDB {
                 }
             }
         } catch (SQLException s){
-            System.out.println(s);
             System.out.println("Could not execute PreparedStatements in getCustomer");
         }
         return null;
     }
 
-    public TType getTTypeObjectFromDB(int transMode){
-        try {
-            getTModeObj.setInt(1, transMode);
-            rs = getTModeObj.executeQuery();
-            TType type = new TType();
-            rs.next();
-            type.setOptionNum(rs.getInt("option_no"));
-            type.setOptionName(rs.getString("option_name"));
-            type.setS_type(rs.getString("s_type"));
-            type.setR_type(rs.getString("r_type"));
-            type.setCharges(rs.getDouble("charges"));
-            return type;
-        } catch (Exception e){
-            return null;
-        }
-    }
     public TType getTTypeObjectFromDB(String serviceID){
         try {
             getTModeObjFromService.setString(1, serviceID);

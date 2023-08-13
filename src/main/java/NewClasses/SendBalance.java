@@ -8,7 +8,7 @@ import java.io.PrintWriter;
 
 public class SendBalance extends TransactionParent{
     private double balance;
-    private String serviceID = "info_balance";
+    private final String serviceID = "info_balance";
 
     public SendBalance(String session_id, int initiator){
         super(session_id, initiator);

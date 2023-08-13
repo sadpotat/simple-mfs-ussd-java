@@ -1,8 +1,6 @@
 package NewClasses;
 
 import Controllers.LogController;
-import Controllers.TransactionController;
-
 import java.sql.SQLException;
 
 public class BillPay extends TransactionParent {

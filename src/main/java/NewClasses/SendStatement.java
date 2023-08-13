@@ -13,9 +13,8 @@ import java.sql.Statement;
 import java.time.format.DateTimeFormatter;
 
 public class SendStatement extends TransactionParent{
-    private double balance;
     private ResultSet pastTransactions;
-    private String serviceID = "info_statement";
+    private final String serviceID = "info_statement";
 
     public SendStatement(String session_id, int initiator){
         super(session_id, initiator);

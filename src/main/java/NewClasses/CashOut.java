@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class CashOut extends TransactionParent{
 
-    private String serviceID = "trns_cout";
+    private final String serviceID = "trns_cout";
     public CashOut(String session_id, int initiator) {
         super(session_id, initiator);
     }

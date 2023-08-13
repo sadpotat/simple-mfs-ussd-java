@@ -5,17 +5,13 @@ import Controllers.LogController;
 import Models.InsertIntoDB;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.crypto.Data;
 import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class PINChange extends TransactionParent{
-    private double balance;
     private int newPIN;
     private int confirmPIN;
-    private String serviceID = "pin_change";
+    private final String serviceID = "pin_change";
 
     public PINChange(String session_id, int initiator){
         super(session_id, initiator);

@@ -5,7 +5,7 @@ import Controllers.LogController;
 import java.sql.SQLException;
 
 public class EMIPayment extends TransactionParent{
-    private String serviceID = "trns_emi";
+    private final String serviceID = "trns_emi";
     public EMIPayment(String session_id, int initiator) {
         super(session_id, initiator);
     }

@@ -8,7 +8,7 @@ import Models.InsertIntoDB;
 import java.sql.SQLException;
 
 public class MobileRecharge extends TransactionParent{
-    private String serviceID = "trns_recharge";
+    private final String serviceID = "trns_recharge";
     public MobileRecharge(String session_id, int initiator) {
         super(session_id, initiator);
     }

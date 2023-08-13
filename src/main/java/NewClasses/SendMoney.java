@@ -5,11 +5,9 @@ import Controllers.LogController;
 import java.sql.SQLException;
 
 public class SendMoney extends TransactionParent{
-    private String serviceID = "tnrs_send";
+    private final String serviceID = "tnrs_send";
     public SendMoney(String session_id, int initiator) {
         super(session_id, initiator);
-        BillPay bill = new BillPay(session_id, initiator);
-//        bill.
     }
 
     @Override

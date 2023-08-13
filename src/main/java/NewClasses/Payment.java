@@ -5,7 +5,7 @@ import Controllers.LogController;
 import java.sql.SQLException;
 
 public class Payment extends TransactionParent{
-    private String serviceID = "trns_pay";
+    private final String serviceID = "trns_pay";
 
     public Payment(String session_id, int initiator) {
         super(session_id, initiator);

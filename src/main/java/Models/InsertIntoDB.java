@@ -1,6 +1,5 @@
 package Models;
 
-import java.io.PrintWriter;
 import java.sql.*;
 
 public class InsertIntoDB {
