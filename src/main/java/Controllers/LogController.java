@@ -20,10 +20,19 @@ public class LogController {
         }
     }
 
-    public static String getLastNthInput(String sessionID, int n) {
+    public static int getLastNthInputInt(String sessionID, int n) {
         GetFromDB getter = Database.getGetter();
         try {
-            return getter.getLastNthInputFromLog(sessionID, n);
+            return getter.getLastNthInputFromLogInt(sessionID, n);
+        } catch (SQLException e) {
+            System.out.println("could not fetch last nth input");
+            return -1;
+        }
+    }
+    public static String getLastNthInputString(String sessionID, int n) {
+        GetFromDB getter = Database.getGetter();
+        try {
+            return getter.getLastNthInputFromLogString(sessionID, n);
         } catch (SQLException e) {
             System.out.println("could not fetch last nth input");
             return "";

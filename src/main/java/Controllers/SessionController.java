@@ -2,6 +2,7 @@ package Controllers;
 
 import Models.InsertIntoDB;
 import Models.Transaction;
+import NewClasses.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
@@ -44,11 +45,12 @@ public class SessionController {
             System.out.println("failed to update last_response");
             Database.rollbackChanges();
             return false;
+
+
         }
     }
 
     public static void processRequest(HttpServletResponse resp, PrintWriter out, int initiator, String sessionID, String serviceID) throws SQLException {
-        Transaction transaction;
         switch (serviceID){
             case "info_balance":
                 TransactionController.sendBalance(sessionID, initiator, out);
@@ -65,36 +67,51 @@ public class SessionController {
                 break;
 
             case "trns_cout":
+                CashOut cout = new CashOut(sessionID, initiator);
+                cout.initialiseFromLog();
+                if (cout.isAllowed(out)){
+                    cout.execute();
+                }
+                break;
+
             case "trns_send":
-            case "trns_payt":
+                SendMoney send = new SendMoney(sessionID, initiator);
+                send.initialiseFromLog();
+                if (send.isAllowed(out)){
+                    send.execute();
+                }
+                break;
+
+            case "trns_pay":
+                Payment pay = new Payment(sessionID, initiator);
+                pay.initialiseFromLog();
+                if(pay.isAllowed(out)){
+                    pay.execute();
+                }
+                break;
+
             case "trns_bill":
+                BillPay bill = new BillPay(sessionID, initiator);
+                bill.initialiseFromLog();
+                if(bill.isAllowed(out)){
+                    bill.execute();
+                }
+                break;
+
             case "trns_emi":
-                // Creating the transaction object
-                transaction = TransactionController.createTransactionOBJ(sessionID, initiator);
-
-                // transacting
-                if (transaction.isAllowed(out))
-                    transaction.execute();
-
-                Database.commitChanges();
-                out.println("Transaction Successful");
-                out.close();
+                EMIPayment emi = new EMIPayment(sessionID, initiator);
+                emi.initialiseFromLog();
+                if(emi.isAllowed(out)){
+                    emi.execute();
+                }
                 break;
 
             case "trns_recharge":
-                // Creating the transaction object
-                transaction = TransactionController.createTransactionOBJForRecharge(sessionID, initiator);
-
-                // transacting
-                if (transaction.isAllowed(out))
-                    transaction.execute();
-
-                // updating transaction log to show the number that was recharged
-                TransactionController.replaceProviderIDWithRechargedNumber(sessionID);
-
-                Database.commitChanges();
-                out.println("Number Recharged Successfully");
-                out.close();
+                MobileRecharge recharge = new MobileRecharge(sessionID, initiator);
+                recharge.initialiseFromLog();
+                if(recharge.isAllowed(out)){
+                    recharge.execute();
+                }
                 break;
 
             default:

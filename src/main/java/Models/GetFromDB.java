@@ -7,6 +7,7 @@ public class GetFromDB {
     private final PreparedStatement getBalance;
     private final PreparedStatement getCustomerPS;
     private final PreparedStatement getTModeObj;
+    private final PreparedStatement getTModeObjFromService;
     private final PreparedStatement getLastSessionPS;
     private final PreparedStatement getLastNthInputPS;
     private final PreparedStatement verifyPINPS;
@@ -22,6 +23,7 @@ public class GetFromDB {
         String getBalanceQuery = "select * from balance where cus_id=?";
         String getCustomerQuery = "select * from customers where cus_id=?";
         String getTModeObjQuery = "select * from modes where option_no=?";
+        String getTModeObjFromServiceQuery = "select * from modes where service_id=?";
         String getLastSessionQuery = "select * from session_data where sim=? order by last_update DESC";
         String getLastNthInputQuery = "select uinput from session_log where session_id=? order by last_update desc OFFSET ? ROWS FETCH NEXT 1 ROWS ONLY";
         String verifyPINQuery = "select * from passwords where cus_id=? and password=?";
@@ -35,6 +37,7 @@ public class GetFromDB {
         getBalance = conn.prepareStatement(getBalanceQuery);
         getCustomerPS = conn.prepareStatement(getCustomerQuery);
         getTModeObj = conn.prepareStatement(getTModeObjQuery);
+        getTModeObjFromService = conn.prepareStatement(getTModeObjFromServiceQuery);
         getLastSessionPS = conn.prepareStatement(getLastSessionQuery);
         getLastNthInputPS = conn.prepareStatement(getLastNthInputQuery);
         verifyPINPS = conn.prepareStatement(verifyPINQuery);
@@ -98,6 +101,22 @@ public class GetFromDB {
             return null;
         }
     }
+    public TType getTTypeObjectFromDB(String serviceID){
+        try {
+            getTModeObjFromService.setString(1, serviceID);
+            rs = getTModeObjFromService.executeQuery();
+            TType type = new TType();
+            rs.next();
+            type.setOptionNum(rs.getInt("option_no"));
+            type.setOptionName(rs.getString("option_name"));
+            type.setS_type(rs.getString("s_type"));
+            type.setR_type(rs.getString("r_type"));
+            type.setCharges(rs.getDouble("charges"));
+            return type;
+        } catch (Exception e){
+            return null;
+        }
+    }
 
     public Session getLastSession(int initiator) {
         Session session = new Session();
@@ -130,7 +149,14 @@ public class GetFromDB {
         return false;
     }
 
-    public String getLastNthInputFromLog(String sessionID, int n) throws SQLException {
+    public int getLastNthInputFromLogInt(String sessionID, int n) throws SQLException {
+        getLastNthInputPS.setString(1, sessionID);
+        getLastNthInputPS.setInt(2, n-1);
+        rs = getLastNthInputPS.executeQuery();
+        rs.next();
+        return rs.getInt("uinput");
+    }
+    public String getLastNthInputFromLogString(String sessionID, int n) throws SQLException {
         getLastNthInputPS.setString(1, sessionID);
         getLastNthInputPS.setInt(2, n-1);
         rs = getLastNthInputPS.executeQuery();
@@ -184,7 +210,7 @@ public class GetFromDB {
         }
     }
 
-    public String getProviderName(String provider) throws SQLException {
+    public String getProviderAccName(String provider) throws SQLException {
         getProviderNamePS.setString(1, provider);
         rs = getProviderNamePS.executeQuery();
         rs.next();

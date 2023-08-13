@@ -52,7 +52,7 @@ public class TransactionController {
     }
 
     public static void sendBalance(String sessionID, int initiator, PrintWriter out) {
-        int hash = Integer.parseInt(LogController.getLastNthInput(sessionID,1));
+        int hash = LogController.getLastNthInputInt(sessionID,1);
 
         // verifying PIN
         if (!verifyPIN(initiator, hash)) {
@@ -68,7 +68,7 @@ public class TransactionController {
 
     public static void sendStatement(String sessionID, int initiator, PrintWriter out) throws SQLException {
         // getting transaction data from the user's previous inputs
-        int hash = Integer.parseInt(LogController.getLastNthInput(sessionID,1));
+        int hash = LogController.getLastNthInputInt(sessionID,1);
 
         // verifying PIN
         if (!verifyPIN(initiator, hash)) {
@@ -95,9 +95,9 @@ public class TransactionController {
     }
 
     public static void sendTransactionInfo(String sessionID, PrintWriter out) {
-        String reference = LogController.getLastNthInput(sessionID,1);
-        int amount = Integer.parseInt(LogController.getLastNthInput(sessionID,2));
-        int receiver = Integer.parseInt(LogController.getLastNthInput(sessionID,3));
+        String reference = LogController.getLastNthInputString(sessionID,1);
+        int amount = LogController.getLastNthInputInt(sessionID,2);
+        int receiver = LogController.getLastNthInputInt(sessionID,3);
 
         // displaying response
         out.println("Receiver: " + receiver +
@@ -109,9 +109,9 @@ public class TransactionController {
 
     public static Transaction createTransactionOBJ(String sessionID, int initiator) {
         // getting transaction info from log
-        int amount = Integer.parseInt(LogController.getLastNthInput(sessionID,3));
-        int receiver = Integer.parseInt(LogController.getLastNthInput(sessionID,4));
-        int tranType = Integer.parseInt(LogController.getLastNthInput(sessionID,5));
+        int amount = LogController.getLastNthInputInt(sessionID,3);
+        int receiver = LogController.getLastNthInputInt(sessionID,4);
+        int tranType = LogController.getLastNthInputInt(sessionID,5);
 
         Models.Transaction transaction = new Models.Transaction();
 
@@ -123,8 +123,8 @@ public class TransactionController {
 
     public static Transaction createTransactionOBJForRecharge(String sessionID, int initiator){
         // getting transaction info from log
-        int amount = Integer.parseInt(LogController.getLastNthInput(sessionID,3));
-        int tranType = Integer.parseInt(LogController.getLastNthInput(sessionID,7));
+        int amount = LogController.getLastNthInputInt(sessionID,3);
+        int tranType = LogController.getLastNthInputInt(sessionID,7);
         int receiver = TransactionController.getProviderAcc(sessionID);
 
         Models.Transaction transaction = new Models.Transaction();
@@ -154,11 +154,11 @@ public class TransactionController {
         GetFromDB getter = Database.getGetter();
 
         // getting provider information from db
-        String simType = Integer.parseInt(LogController.getLastNthInput(sessionID, 5))==1 ? "PREPAID": "POSTPAID";
-        String provider = LogController.getLastNthInput(sessionID, 6);
+        String simType = LogController.getLastNthInputInt(sessionID, 5)==1 ? "PREPAID": "POSTPAID";
+        String provider = LogController.getLastNthInputString(sessionID, 6);
 
         try {
-            String providerName = getter.getProviderName(provider);
+            String providerName = getter.getProviderAccName(provider);
             String name = providerName + "_" + simType;
             return getter.getProviderID(name);
         } catch (SQLException e) {
@@ -167,7 +167,7 @@ public class TransactionController {
     }
 
     public static void replaceProviderIDWithRechargedNumber(String sessionID) throws SQLException {
-        int receiver = Integer.parseInt(LogController.getLastNthInput(sessionID,4));
+        int receiver = LogController.getLastNthInputInt(sessionID,4);
         InsertIntoDB insert = Database.getInsert();
         insert.updateReceiverInTLog(sessionID, receiver);
     }
