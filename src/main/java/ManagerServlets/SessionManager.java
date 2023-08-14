@@ -1,9 +1,9 @@
 package ManagerServlets;
 
+import Cache.CacheLoader;
 import Controllers.*;
 import Models.*;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -15,14 +15,18 @@ public class SessionManager extends HttpServlet {
     public void init() {
         AuthHeader auth = new AuthHeader("ussd", "ussd12345", "sadiadb3");
         Database.connectToDatabase(auth);
+        CacheLoader cache = CacheLoader.getInstance();
     }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Database db = Database.getDb();
         resp.setContentType("html/text");
         PrintWriter out = resp.getWriter();
 
-        if (db==null){
+        CacheLoader cache = CacheLoader.getInstance();
+
+        if (db==null || cache==null){
             // error handling for when the server fails to connect to the db on servlet initialization
             resp.setStatus(500);
             out.println("Internal Server Error");

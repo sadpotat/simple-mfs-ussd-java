@@ -1,4 +1,4 @@
-package NewClasses;
+package Services;
 
 import Controllers.Database;
 import Controllers.LogController;
@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 
-public class PINChange extends TransactionParent{
+public class PINChange extends ServiceController {
     private int newPIN;
     private int confirmPIN;
     private final String serviceID = "pin_change";

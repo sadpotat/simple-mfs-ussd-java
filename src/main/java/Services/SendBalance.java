@@ -1,4 +1,4 @@
-package NewClasses;
+package Services;
 
 import Controllers.Database;
 import Controllers.LogController;
@@ -6,7 +6,7 @@ import Controllers.LogController;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 
-public class SendBalance extends TransactionParent{
+public class SendBalance extends ServiceController {
     private double balance;
     private final String serviceID = "info_balance";
 

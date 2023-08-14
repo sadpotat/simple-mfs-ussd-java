@@ -1,4 +1,4 @@
-package Models;
+package Cache;
 
 public class TType {
     private int optionNum;
@@ -6,6 +6,17 @@ public class TType {
     private String s_type;
     private String r_type;
     private double charges;
+
+    public TType() {
+    }
+
+    public TType(int optionNum, String optionName, String s_type, String r_type, double charges) {
+        this.optionNum = optionNum;
+        this.optionName = optionName;
+        this.s_type = s_type;
+        this.r_type = r_type;
+        this.charges = charges;
+    }
 
     public int getOptionNum() {
         return optionNum;

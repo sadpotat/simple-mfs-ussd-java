@@ -1,4 +1,4 @@
-package NewClasses;
+package Services;
 
 import Controllers.Database;
 import Controllers.LogController;
@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.format.DateTimeFormatter;
 
-public class SendStatement extends TransactionParent{
+public class SendStatement extends ServiceController {
     private ResultSet pastTransactions;
     private final String serviceID = "info_statement";
 

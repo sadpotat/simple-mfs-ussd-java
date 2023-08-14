@@ -1,16 +1,16 @@
-package NewClasses;
+package Services;
 
 import Controllers.Database;
 import Controllers.LogController;
 import Models.Customer;
 import Models.GetFromDB;
-import Models.TType;
+import Cache.TType;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.sql.*;
 
-abstract class TransactionParent {
+abstract class ServiceController implements Service{
     protected int PIN;
     protected final GetFromDB getter;
     protected PreparedStatement insertTransaction;
@@ -23,9 +23,8 @@ abstract class TransactionParent {
     protected double amount;
     protected final String sessionID;
     protected TType tType;
-    protected String serviceID;
 
-    public TransactionParent(String session_id, int initiator) {
+    public ServiceController(String session_id, int initiator) {
         sessionID = session_id;
         getter = Database.getGetter();
         sender = initiator;
@@ -33,9 +32,9 @@ abstract class TransactionParent {
     }
 
     // must be called before asking for PIN
-    abstract void initialiseFromLog() throws SQLException;
+    public abstract void initialiseFromLog() throws SQLException;
 
-    protected void updatefields(int rec, int amnt) throws SQLException {
+    protected void updatefields(int rec, int amnt, String serviceID) throws SQLException {
         receiver = rec;
         receiverObj = getter.getCustomer(rec);
         amount = amnt;

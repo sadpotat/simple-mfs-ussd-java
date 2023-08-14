@@ -1,13 +1,13 @@
-package NewClasses;
+package Services;
 
 import Controllers.LogController;
+
 import java.sql.SQLException;
 
-public class BillPay extends TransactionParent {
+public class CashOut extends ServiceController {
 
-    public String serviceID = "trns_bill";
-
-    public BillPay(String session_id, int initiator){
+    private final String serviceID = "trns_cout";
+    public CashOut(String session_id, int initiator) {
         super(session_id, initiator);
     }
 
@@ -17,6 +17,6 @@ public class BillPay extends TransactionParent {
         int amnt = LogController.getLastNthInputInt(sessionID,2);
         int rec = LogController.getLastNthInputInt(sessionID,3);
 
-        updatefields(rec, amnt);
+        updatefields(rec, amnt, serviceID);
     }
 }

@@ -1,5 +1,7 @@
 package Models;
 
+import Cache.TType;
+
 import java.sql.*;
 
 public class GetFromDB {
@@ -16,6 +18,7 @@ public class GetFromDB {
     private final PreparedStatement getResponseStringPS;
     private final PreparedStatement getProviderNamePS;
     private final PreparedStatement getProviderIDPS;
+    private final PreparedStatement getServiceClassPS;
 
     public GetFromDB(Connection conn) throws SQLException {
 
@@ -32,6 +35,7 @@ public class GetFromDB {
         String getResponseStringQuery = "select res_str, type from responses where menu=?";
         String getProviderNameQuery = "select name from provider where menu=?";
         String getProviderIDQuery = "select cus_id from customers where name=?";
+        String getServiceClassQuery = "select class from service_classes where service_id=?";
 
         // initialising prepared statements
         getBalance = conn.prepareStatement(getBalanceQuery);
@@ -46,6 +50,7 @@ public class GetFromDB {
         getResponseStringPS = conn.prepareStatement(getResponseStringQuery);
         getProviderNamePS = conn.prepareStatement(getProviderNameQuery);
         getProviderIDPS = conn.prepareStatement(getProviderIDQuery);
+        getServiceClassPS = conn.prepareStatement(getServiceClassQuery);
     }
 
     public double getBalance(int user) {
@@ -205,5 +210,12 @@ public class GetFromDB {
         rs = getProviderIDPS.executeQuery();
         rs.next();
         return rs.getInt("cus_id");
+    }
+
+    public String getServiceClassFromID(String serviceID) throws SQLException {
+        getServiceClassPS.setString(1, serviceID);
+        rs = getServiceClassPS.executeQuery();
+        rs.next();
+        return rs.getString("class");
     }
 }

@@ -1,4 +1,4 @@
-package NewClasses;
+package Services;
 
 import Controllers.Database;
 import Controllers.LogController;
@@ -7,7 +7,7 @@ import Models.InsertIntoDB;
 
 import java.sql.SQLException;
 
-public class MobileRecharge extends TransactionParent{
+public class MobileRecharge extends ServiceController {
     private final String serviceID = "trns_recharge";
     public MobileRecharge(String session_id, int initiator) {
         super(session_id, initiator);
@@ -18,7 +18,7 @@ public class MobileRecharge extends TransactionParent{
         int amnt = LogController.getLastNthInputInt(sessionID,2);
         int rec = getProviderAcc(sessionID);
 
-        updatefields(rec, amnt);
+        updatefields(rec, amnt, serviceID);
     }
 
     public static int getProviderAcc(String sessionID){

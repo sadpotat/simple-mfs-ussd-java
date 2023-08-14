@@ -1,11 +1,22 @@
 package Models;
 
+import Controllers.Database;
+
 public class Customer {
     private int cus_id;
     private String name;
     private String status;
     private String type;
     private double balance;
+
+    public Customer(){}
+    public Customer(int id, String cname, String stat, String typ) {
+        cus_id = id;
+        name = cname;
+        status = stat;
+        type = typ;
+        balance = Database.getGetter().getBalance(cus_id);
+    }
 
     public int getCus_id() {
         return cus_id;

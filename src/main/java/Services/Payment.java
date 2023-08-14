@@ -1,10 +1,10 @@
-package NewClasses;
+package Services;
 
 import Controllers.LogController;
 
 import java.sql.SQLException;
 
-public class Payment extends TransactionParent{
+public class Payment extends ServiceController {
     private final String serviceID = "trns_pay";
 
     public Payment(String session_id, int initiator) {
@@ -17,6 +17,6 @@ public class Payment extends TransactionParent{
         int amnt = LogController.getLastNthInputInt(sessionID,3);
         int rec = LogController.getLastNthInputInt(sessionID,4);
 
-        updatefields(rec, amnt);
+        updatefields(rec, amnt, serviceID);
     }
 }
