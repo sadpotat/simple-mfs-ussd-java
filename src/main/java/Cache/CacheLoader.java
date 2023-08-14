@@ -8,7 +8,7 @@ import java.sql.Statement;
 import java.util.HashMap;
 
 public class CacheLoader {
-    private Statement statement;
+    private final Statement statement;
     private ResultSet rs;
     private HashMap<String, MenuRoute> menuRoutes;
     private HashMap<String, TType> modes;

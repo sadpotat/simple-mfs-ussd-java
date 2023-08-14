@@ -1,7 +1,5 @@
 package Cache;
 
-import java.awt.*;
-
 public class MenuRoute {
     private String accType;
     private String nextResponse;

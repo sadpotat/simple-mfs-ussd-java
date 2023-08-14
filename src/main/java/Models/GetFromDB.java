@@ -8,7 +8,6 @@ public class GetFromDB {
     private ResultSet rs;
     private final PreparedStatement getBalance;
     private final PreparedStatement getCustomerPS;
-    private final PreparedStatement getTModeObj;
     private final PreparedStatement getTModeObjFromService;
     private final PreparedStatement getLastSessionPS;
     private final PreparedStatement getLastNthInputPS;
@@ -25,7 +24,6 @@ public class GetFromDB {
         // query strings
         String getBalanceQuery = "select * from balance where cus_id=?";
         String getCustomerQuery = "select * from customers where cus_id=?";
-        String getTModeObjQuery = "select * from modes where option_no=?";
         String getTModeObjFromServiceQuery = "select * from modes where service_id=?";
         String getLastSessionQuery = "select * from session_data where sim=? order by last_update DESC";
         String getLastNthInputQuery = "select uinput from session_log where session_id=? order by last_update desc OFFSET ? ROWS FETCH NEXT 1 ROWS ONLY";
@@ -40,7 +38,6 @@ public class GetFromDB {
         // initialising prepared statements
         getBalance = conn.prepareStatement(getBalanceQuery);
         getCustomerPS = conn.prepareStatement(getCustomerQuery);
-        getTModeObj = conn.prepareStatement(getTModeObjQuery);
         getTModeObjFromService = conn.prepareStatement(getTModeObjFromServiceQuery);
         getLastSessionPS = conn.prepareStatement(getLastSessionQuery);
         getLastNthInputPS = conn.prepareStatement(getLastNthInputQuery);

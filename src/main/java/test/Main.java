@@ -4,8 +4,6 @@ import Controllers.Database;
 import Models.AuthHeader;
 import Models.Customer;
 
-import javax.swing.plaf.nimbus.State;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
