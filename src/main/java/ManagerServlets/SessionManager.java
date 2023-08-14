@@ -54,8 +54,8 @@ public class SessionManager extends HttpServlet {
         String sessionID = session.getSession_id();
 
         // verifying input
-        // getting input regex from db
-        Regex regexObj = getter.getRegexString(prevResponse);
+        // getting input regex from cache
+        Regex regexObj = cache.getRegexObj(prevResponse, input);
         String regex = regexObj.getRegex();
         String errorMsg = regexObj.getError_msg();
 
@@ -68,9 +68,9 @@ public class SessionManager extends HttpServlet {
         if(!input.matches(regex)){
             // send the last response again when regex does not match
             out.println(errorMsg);
-            Response response = getter.getResponse(prevResponse);
-            if (response.getType().equals("static")){
-                Responses.sendResponse(response.getRes_str(), out);
+            String response = cache.getResponse(prevResponse);
+            if (!response.startsWith("/")){
+                Responses.sendResponse(response, out);
                 return;
             }
             // ignoring response text for forward type responses
@@ -88,6 +88,7 @@ public class SessionManager extends HttpServlet {
         String accType = user.getType();
 
         // getting the next response menu name
+        ////////////////////////////////// START HERE
         NextResponse nextResponse = MenuController.getNextMenu(prevResponse, accType, input);
 
         if (nextResponse==null){
@@ -129,10 +130,9 @@ public class SessionManager extends HttpServlet {
 
         // sending next response
         try {
-            Response response = getter.getResponse(nextMenu);
-            String resStr = response.getRes_str();
-            if (response.getType().equals("static")) {
-                Responses.sendResponse(resStr, out);
+            String response = cache.getResponse(prevResponse);
+            if (!response.startsWith("/")){
+                Responses.sendResponse(response, out);
                 return;
             }
 

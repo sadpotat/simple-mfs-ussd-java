@@ -1,6 +1,8 @@
 package Cache;
 
 import Controllers.Database;
+import Models.Regex;
+import Models.Response;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -95,6 +97,16 @@ public class CacheLoader {
         return map;
     }
 
+    public Regex getRegexObj(String prevResponse, String input){
+        try{
+            MenuRoute route = menuRoutes.get(prevResponse + " " + input);
+            return new Regex(route.getRegex(), route.getErrorMessage());
+        } catch (Exception e){
+            MenuRoute route = menuRoutes.get(prevResponse + " -1");
+            return new Regex(route.getRegex(), route.getErrorMessage());
+        }
+    }
+
     public HashMap<String, MenuRoute> getMenuRoutes() {
         return menuRoutes;
     }
@@ -125,5 +137,9 @@ public class CacheLoader {
 
     public void setServiceClassNames(HashMap<String, String> serviceClassNames) {
         this.serviceClassNames = serviceClassNames;
+    }
+
+    public String getResponse(String prevResponse) {
+        return menuResponses.get(prevResponse);
     }
 }

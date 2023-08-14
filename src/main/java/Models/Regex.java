@@ -4,6 +4,11 @@ public class Regex {
     private String regex;
     private String error_msg;
 
+    public Regex(String regex, String error_msg) {
+        this.regex = regex;
+        this.error_msg = error_msg;
+    }
+
     public Regex(){
         regex = "";
         error_msg = "";
