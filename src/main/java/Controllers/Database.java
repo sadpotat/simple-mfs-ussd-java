@@ -72,13 +72,6 @@ public class Database {
         conn.rollback();
     }
 
-    private void close() throws SQLException {
-        System.out.println();
-        System.out.println("Disconnecting from the database...");
-        conn.close();
-        db = null;
-    }
-
     public static void commitChanges() throws SQLException {
         db.commit();
     }
@@ -94,15 +87,8 @@ public class Database {
         return getter;
     }
 
-    public static void setGetter(GetFromDB getter) {
-        Database.getter = getter;
-    }
-
     public static InsertIntoDB getInsert() {
         return insert;
     }
 
-    public static void setInsert(InsertIntoDB insert) {
-        Database.insert = insert;
-    }
 }
