@@ -1,4 +1,4 @@
-package ManagerServlets;
+package Servlets;
 
 import Cache.CacheLoader;
 import Controllers.*;

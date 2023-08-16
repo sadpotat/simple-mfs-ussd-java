@@ -38,7 +38,7 @@ abstract class ServiceController implements Service{
     // must be called before asking for PIN
     public abstract void initialiseFromLog() throws SQLException;
 
-    protected void updatefields(int rec, int amnt, String serviceID) throws SQLException {
+    protected void updateFields(int rec, int amnt, String serviceID) throws SQLException {
         receiver = rec;
         receiverObj = getter.getCustomer(rec);
         amount = amnt;
@@ -112,8 +112,6 @@ abstract class ServiceController implements Service{
     }
 
     protected boolean amountIsInBalance() {
-        System.out.println(amount);
-        System.out.println(senderObj.getBalance());
         return (amount < senderObj.getBalance());
     }
 

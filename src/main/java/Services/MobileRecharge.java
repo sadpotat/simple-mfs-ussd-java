@@ -19,7 +19,7 @@ public class MobileRecharge extends ServiceController {
         int amnt = LogController.getLastNthInputInt(sessionID,2);
         int rec = getProviderAcc(sessionID);
 
-        updatefields(rec, amnt, serviceID);
+        updateFields(rec, amnt, serviceID);
     }
 
     public static int getProviderAcc(String sessionID){

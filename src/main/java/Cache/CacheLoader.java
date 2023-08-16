@@ -30,6 +30,10 @@ public class CacheLoader {
         menuRegex = createMenuRegex();
     }
 
+    public static void cacheReload() throws SQLException {
+        cache = new CacheLoader();
+    }
+
     private HashMap<String, Regex> createMenuRegex() throws SQLException {
         rs = statement.executeQuery("select * from menu_regex");
         HashMap<String, Regex> map = new HashMap<>();

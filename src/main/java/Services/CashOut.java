@@ -17,6 +17,6 @@ public class CashOut extends ServiceController {
         int amnt = LogController.getLastNthInputInt(sessionID,2);
         int rec = LogController.getLastNthInputInt(sessionID,3);
 
-        updatefields(rec, amnt, serviceID);
+        updateFields(rec, amnt, serviceID);
     }
 }

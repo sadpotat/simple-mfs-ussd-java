@@ -1,12 +1,20 @@
 <web-app>
-    <!--    Servlets for managing the session-->
     <servlet>
         <servlet-name>manager</servlet-name>
-        <servlet-class>ManagerServlets.SessionManager</servlet-class>
+        <servlet-class>Servlets.SessionManager</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>manager</servlet-name>
         <url-pattern>/ussd</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>cacheReload</servlet-name>
+        <servlet-class>Servlets.CacheReloader</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>cacheReload</servlet-name>
+        <url-pattern>/reload</url-pattern>
     </servlet-mapping>
 
 </web-app>

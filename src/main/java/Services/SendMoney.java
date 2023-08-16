@@ -15,6 +15,6 @@ public class SendMoney extends ServiceController {
         int amnt = LogController.getLastNthInputInt(sessionID,3);
         int rec = LogController.getLastNthInputInt(sessionID,4);
 
-        updatefields(rec, amnt, serviceID);
+        updateFields(rec, amnt, serviceID);
     }
 }
