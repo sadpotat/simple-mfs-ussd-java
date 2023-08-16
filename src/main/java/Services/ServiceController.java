@@ -1,5 +1,6 @@
 package Services;
 
+import Cache.CacheLoader;
 import Controllers.Database;
 import Controllers.LogController;
 import Models.Customer;
@@ -9,6 +10,7 @@ import Cache.TType;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.sql.*;
+
 
 abstract class ServiceController implements Service{
     protected int PIN;
@@ -23,8 +25,10 @@ abstract class ServiceController implements Service{
     protected double amount;
     protected final String sessionID;
     protected TType tType;
+    CacheLoader cache;
 
     public ServiceController(String session_id, int initiator) {
+        cache = CacheLoader.getInstance();
         sessionID = session_id;
         getter = Database.getGetter();
         sender = initiator;
@@ -38,7 +42,7 @@ abstract class ServiceController implements Service{
         receiver = rec;
         receiverObj = getter.getCustomer(rec);
         amount = amnt;
-        tType = getter.getTTypeObjectFromDB(serviceID);
+        tType = cache.getTType(serviceID);
         addCharges();
 
         // query strings

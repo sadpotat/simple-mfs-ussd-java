@@ -1,10 +1,13 @@
 package Models;
 
-import java.lang.ref.SoftReference;
-
-public class NextResponse {
+public class NextMenuAndID {
     private String menuNo;
     private String serviceID;
+
+    public NextMenuAndID(String menuNo, String serviceID) {
+        this.menuNo = menuNo;
+        this.serviceID = serviceID;
+    }
 
     public String getMenuNo() {
         return menuNo;

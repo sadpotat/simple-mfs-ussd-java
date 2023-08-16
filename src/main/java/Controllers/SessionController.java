@@ -1,6 +1,6 @@
 package Controllers;
 
-import Models.GetFromDB;
+import Cache.CacheLoader;
 import Models.InsertIntoDB;
 import Services.*;
 
@@ -24,43 +24,13 @@ public class SessionController {
         }
     }
 
-    public static boolean updateLastResponse(String sessionID, String value) {
-        InsertIntoDB insert = Database.getInsert();
-        try {
-            insert.enterIntoSessionString(sessionID, "last_resp", value);
-            Database.commitChanges();
-            return true;
-        } catch (SQLException e) {
-            System.out.println("Failed to update last response");
-            Database.rollbackChanges();
-            return false;
-        }
-    }
-
-    public static boolean updateLastInput(String sessionId, String input) {
-        InsertIntoDB insert = Database.getInsert();
-        try {
-            insert.enterIntoSessionString(sessionId, "last_input", input);
-            Database.commitChanges();
-            return true;
-        } catch (SQLException e) {
-            System.out.println("failed to update last_response");
-            Database.rollbackChanges();
-            return false;
-
-
-        }
-    }
-
-    public static void processRequest(HttpServletResponse resp, PrintWriter out, int initiator, String sessionID, String serviceID) throws SQLException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        GetFromDB getter = Database.getGetter();
-        String className = getter.getServiceClassFromID(serviceID);
-
+    public static void processRequest(HttpServletResponse resp, PrintWriter out, int initiator, String sessionID, String serviceID) throws SQLException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, NullPointerException {
+        CacheLoader cache = CacheLoader.getInstance();
+        String className = cache.getServiceClassName(serviceID);
         Class<?> clazz = Class.forName(className);
 
         // getting class constructor that takes specific argument types
         Constructor<?> constructor = clazz.getConstructor(String.class, int.class);
-
         // creating an instance using the constructor and provided arguments
         Object[] arguments = {sessionID, initiator};
         Service service = (Service) constructor.newInstance(arguments);
@@ -71,17 +41,29 @@ public class SessionController {
             service.execute();
             service.sendSuccessMessage(resp, out);
         }
-
     }
 
     public static boolean updateServiceID(String sessionID, String serviceID) {
         InsertIntoDB insert = Database.getInsert();
         try {
-            insert.enterIntoSessionString(sessionID, "service_id", serviceID);
+            insert.updateServiceID(sessionID, serviceID);
             Database.commitChanges();
             return true;
         } catch (SQLException e) {
             System.out.println("failed to update serviceID");
+            Database.rollbackChanges();
+            return false;
+        }
+    }
+
+    public static boolean updateInputAndResponse(String sessionID, String input, String lastResponse) {
+        InsertIntoDB insert = Database.getInsert();
+        try{
+            insert.updateLastInputAndResponse(sessionID, input, lastResponse);
+            Database.commitChanges();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("failed to update last response and input");
             Database.rollbackChanges();
             return false;
         }

@@ -18,18 +18,6 @@ public class RequestParsers {
         }
     }
 
-    public static double getQueryDouble(HttpServletRequest req, String param){
-        Map<String, String> params = Utils.queryToMap(req.getQueryString());
-        try {
-            String data = params.get(param);
-            return Double.parseDouble(data);
-        } catch (Exception e){
-            System.out.println(e);
-            System.out.println("could not find " + param + " in request query");
-            return -1;
-        }
-    }
-
     public static String getQueryString(HttpServletRequest req, String param) {
         Map<String, String> params = Utils.queryToMap(req.getQueryString());
         try {

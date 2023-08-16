@@ -1,26 +1,31 @@
 package Models;
 
+import Controllers.Database;
+
 import java.sql.*;
 
 public class InsertIntoDB {
-    private final Statement statement;
     private final PreparedStatement createSessionPS;
     private final PreparedStatement insertIntoLogPS;
     private final PreparedStatement updatePINPS;
+    private final PreparedStatement updateServiceIDPS;
     private final PreparedStatement updateReceiverinTLogPS;
+    private final PreparedStatement updateLastInputAndResponsePS;
 
     public InsertIntoDB(Connection conn) throws SQLException {
-        statement = conn.createStatement();
-
         String createSessionQuery = "insert into session_data(session_id, sim) values(?, ?)";
         String insertIntoLogQuery = "insert into session_log(session_id, uinput, LAST_UPDATE) values (?, ?, CURRENT_TIMESTAMP)";
         String updatePINQuery = "update passwords set password=? where cus_id=? and password=?";
+        String updateServiceIDQuery = "update session_data set service_id=? where session_id=?";
         String updateReceiverInTLogQuery = "update transactions set receiver_id=? where session_id=?";
+        String updateLastInputAndResponseQuery = "update session_data set last_input=?, last_resp=?, last_update=CURRENT_TIMESTAMP where session_id=?";
 
         createSessionPS = conn.prepareStatement(createSessionQuery);
         insertIntoLogPS = conn.prepareStatement(insertIntoLogQuery);
         updatePINPS = conn.prepareStatement(updatePINQuery);
+        updateServiceIDPS = conn.prepareStatement(updateServiceIDQuery);
         updateReceiverinTLogPS = conn.prepareStatement(updateReceiverInTLogQuery);
+        updateLastInputAndResponsePS = conn.prepareStatement(updateLastInputAndResponseQuery);
     }
 
     public void createSessionEntry(String sessionID, int number) throws SQLException {
@@ -29,9 +34,17 @@ public class InsertIntoDB {
         createSessionPS.executeUpdate();
     }
 
-    public void enterIntoSessionString(String sessionId, String column, String value) throws SQLException {
-        String queryString = "update session_data set " + column + "='" + value + "', last_update=CURRENT_TIMESTAMP where session_id='" + sessionId + "'";
-        statement.executeUpdate(queryString);
+    public void updateServiceID(String sessionID, String serviceId) throws SQLException {
+        updateServiceIDPS.setString(1, serviceId);
+        updateServiceIDPS.setString(2, sessionID);
+        updateServiceIDPS.executeUpdate();
+    }
+
+    public void updateLastInputAndResponse(String sessionId, String input, String lastResponse) throws SQLException {
+        updateLastInputAndResponsePS.setString(1, input);
+        updateLastInputAndResponsePS.setString(2, lastResponse);
+        updateLastInputAndResponsePS.setString(3, sessionId);
+        updateLastInputAndResponsePS.executeUpdate();
     }
 
     public void insertIntoLog(String sessionID, String input) throws SQLException {
@@ -52,4 +65,5 @@ public class InsertIntoDB {
         updateReceiverinTLogPS.setString(2, sessionID);
         updateReceiverinTLogPS.executeUpdate();
     }
+
 }

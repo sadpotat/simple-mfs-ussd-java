@@ -1,8 +1,8 @@
 package Cache;
 
 import Controllers.Database;
+import Models.NextMenuAndID;
 import Models.Regex;
-import Models.Response;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,9 +13,11 @@ public class CacheLoader {
     private final Statement statement;
     private ResultSet rs;
     private HashMap<String, MenuRoute> menuRoutes;
+    private HashMap<String, Regex> menuRegex;
     private HashMap<String, TType> modes;
     private HashMap<String, String> menuResponses;
     private HashMap<String, String> serviceClassNames;
+    private HashMap<String, String> providerName;
     private static CacheLoader cache;
 
     public CacheLoader() throws SQLException {
@@ -24,6 +26,32 @@ public class CacheLoader {
         modes = createModes();
         menuResponses = createMenuResponses();
         serviceClassNames = createServiceClasses();
+        providerName = createProviders();
+        menuRegex = createMenuRegex();
+    }
+
+    private HashMap<String, Regex> createMenuRegex() throws SQLException {
+        rs = statement.executeQuery("select * from menu_regex");
+        HashMap<String, Regex> map = new HashMap<>();
+        Regex regexObj;
+
+        while(rs.next()){
+            regexObj = new Regex(rs.getString("regex"),
+                    rs.getString("error_msg"));
+            map.put(rs.getString("menu"), regexObj);
+        }
+
+        return map;
+    }
+
+    private HashMap<String, String> createProviders() throws SQLException {
+        rs = statement.executeQuery("select * from provider");
+        HashMap<String, String> map = new HashMap<>();
+
+        while (rs.next()){
+            map.put(rs.getString("menu"), rs.getString("name"));
+        }
+        return map;
     }
 
     public static CacheLoader getInstance() {
@@ -46,8 +74,6 @@ public class CacheLoader {
         while(rs.next()){
             menuRoute = new MenuRoute(rs.getString("account_type"),
                     rs.getString("next_response"),
-                    rs.getString("regex_for_input"),
-                    rs.getString("error_msg"),
                     rs.getString("service_id"));
             // the key is a "prevResponse userInput" string
             map.put(rs.getString("prev_response") + " " + rs.getString("uinput"),
@@ -97,16 +123,6 @@ public class CacheLoader {
         return map;
     }
 
-    public Regex getRegexObj(String prevResponse, String input){
-        try{
-            MenuRoute route = menuRoutes.get(prevResponse + " " + input);
-            return new Regex(route.getRegex(), route.getErrorMessage());
-        } catch (Exception e){
-            MenuRoute route = menuRoutes.get(prevResponse + " -1");
-            return new Regex(route.getRegex(), route.getErrorMessage());
-        }
-    }
-
     public HashMap<String, MenuRoute> getMenuRoutes() {
         return menuRoutes;
     }
@@ -135,11 +151,38 @@ public class CacheLoader {
         return serviceClassNames;
     }
 
+    public Regex getRegexObj(String prevResponse){
+        return menuRegex.get(prevResponse);
+    }
+
     public void setServiceClassNames(HashMap<String, String> serviceClassNames) {
         this.serviceClassNames = serviceClassNames;
     }
 
     public String getResponse(String prevResponse) {
         return menuResponses.get(prevResponse);
+    }
+
+    public NextMenuAndID getNextMenu(String prevResponse, String accType, String input) {
+        NextMenuAndID nextMenuAndID;
+        MenuRoute route;
+        route = menuRoutes.get(prevResponse + " " + input);
+        if (route==null)
+            route = menuRoutes.get(prevResponse + " -1");
+
+        nextMenuAndID = new NextMenuAndID(route.getNextResponse(), route.getServiceID());
+        return nextMenuAndID;
+    }
+
+    public String getServiceClassName(String serviceID) {
+        return serviceClassNames.get(serviceID);
+    }
+
+    public String getProviderName(String option) {
+        return providerName.get(option);
+    }
+
+    public TType getTType(String serviceID) {
+        return modes.get(serviceID);
     }
 }

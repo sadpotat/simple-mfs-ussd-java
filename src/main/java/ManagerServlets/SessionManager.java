@@ -55,7 +55,7 @@ public class SessionManager extends HttpServlet {
 
         // verifying input
         // getting input regex from cache
-        Regex regexObj = cache.getRegexObj(prevResponse, input);
+        Regex regexObj = cache.getRegexObj(prevResponse);
         String regex = regexObj.getRegex();
         String errorMsg = regexObj.getError_msg();
 
@@ -69,11 +69,7 @@ public class SessionManager extends HttpServlet {
             // send the last response again when regex does not match
             out.println(errorMsg);
             String response = cache.getResponse(prevResponse);
-            if (!response.startsWith("/")){
-                Responses.sendResponse(response, out);
-                return;
-            }
-            // ignoring response text for forward type responses
+            Responses.sendResponse(response, out);
             return;
         }
 
@@ -88,27 +84,33 @@ public class SessionManager extends HttpServlet {
         String accType = user.getType();
 
         // getting the next response menu name
-        ////////////////////////////////// START HERE
-        NextResponse nextResponse = MenuController.getNextMenu(prevResponse, accType, input);
+        NextMenuAndID nextMenuAndID = cache.getNextMenu(prevResponse, accType, input);
 
-        if (nextResponse==null){
+        if (nextMenuAndID ==null){
             // handling errors
             Responses.internalServerError(resp, out);
             return;
         }
 
-        String nextMenu = nextResponse.getMenuNo();
-        String serviceID = nextResponse.getServiceID();
+        String nextMenu = nextMenuAndID.getMenuNo();
+        String serviceID = nextMenuAndID.getServiceID();
 
-        // updating last response
-        if(!SessionController.updateLastResponse(sessionID, nextMenu)){
-            // handling errors
-            Responses.internalServerError(resp, out);
-            return;
-        }
+//        // updating last response
+//        if(!SessionController.updateLastResponse(sessionID, nextMenu)){
+//            // handling errors
+//            Responses.internalServerError(resp, out);
+//            return;
+//        }
+//
+//        // updating last input in session data
+//        if(!SessionController.updateLastInput(sessionID, input)){
+//            // handling errors
+//            Responses.internalServerError(resp, out);
+//            return;
+//        }
 
-        // updating last input in session data
-        if(!SessionController.updateLastInput(sessionID, input)){
+        // updating last input and last response
+        if(!SessionController.updateInputAndResponse(sessionID, input, nextMenu)){
             // handling errors
             Responses.internalServerError(resp, out);
             return;
@@ -130,18 +132,13 @@ public class SessionManager extends HttpServlet {
 
         // sending next response
         try {
-            String response = cache.getResponse(prevResponse);
+            String response = cache.getResponse(nextMenu);
             if (!response.startsWith("/")){
                 Responses.sendResponse(response, out);
                 return;
             }
 
-            // when type is 'forward', process request
-//            if (resStr.equals("info")) {
-//                TransactionController.sendTransactionInfo(sessionID, out);
-//                return;
-//            }
-
+            // responses starting with '/' indicate that a service will run
             serviceID = serviceID.equals("none") ? session.getServiceID(): serviceID;
             SessionController.processRequest(resp, out, initiator, sessionID, serviceID);
 

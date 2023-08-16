@@ -1,5 +1,6 @@
 package Services;
 
+import Cache.CacheLoader;
 import Controllers.Database;
 import Controllers.LogController;
 import Models.GetFromDB;
@@ -22,17 +23,17 @@ public class MobileRecharge extends ServiceController {
     }
 
     public static int getProviderAcc(String sessionID){
+        CacheLoader cache = CacheLoader.getInstance();
         GetFromDB getter = Database.getGetter();
-
         // getting provider information from db
         String simType = LogController.getLastNthInputInt(sessionID, 4)==1 ? "PREPAID": "POSTPAID";
         String provider = LogController.getLastNthInputString(sessionID, 5);
 
         try {
-            String providerName = getter.getProviderAccName(provider);
+            String providerName = cache.getProviderName(provider);
             String name = providerName + "_" + simType;
             return getter.getProviderID(name);
-        } catch (SQLException e) {
+        } catch (Exception e) {
             return -1;
         }
     }

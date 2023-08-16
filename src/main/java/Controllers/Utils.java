@@ -23,17 +23,6 @@ public class Utils {
         return result;
     }
 
-    public static boolean isNumeric(String num){
-        // checking if the number contains any non-numeric characters
-        try{
-            Integer.parseInt(num);
-            return true;
-        } catch (Exception e){
-            System.out.println(e);
-            return false;
-        }
-    }
-
     public static String createSessionID(){
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         int bound = characters.length();

@@ -9,11 +9,6 @@ public class Regex {
         this.error_msg = error_msg;
     }
 
-    public Regex(){
-        regex = "";
-        error_msg = "";
-    }
-
     public String getRegex() {
         return regex;
     }
