@@ -1,0 +1,40 @@
+--------------------------------------------------------
+--  File created - Wednesday-August-16-2023   
+--------------------------------------------------------
+--------------------------------------------------------
+--  DDL for Table MODES
+--------------------------------------------------------
+
+  CREATE TABLE "USSD"."MODES" 
+   (	"OPTION_NO" NUMBER(2,0), 
+	"OPTION_NAME" VARCHAR2(20 BYTE), 
+	"S_TYPE" VARCHAR2(8 BYTE), 
+	"R_TYPE" VARCHAR2(8 BYTE), 
+	"CHARGES" FLOAT(5), 
+	"SERVICE_ID" VARCHAR2(20 BYTE)
+   ) SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+REM INSERTING into USSD.MODES
+SET DEFINE OFF;
+Insert into USSD.MODES (OPTION_NO,OPTION_NAME,S_TYPE,R_TYPE,CHARGES,SERVICE_ID) values (4,'Payment','PERSONAL','MERCHANT',0,'trns_pay');
+Insert into USSD.MODES (OPTION_NO,OPTION_NAME,S_TYPE,R_TYPE,CHARGES,SERVICE_ID) values (5,'Bill Pay','PERSONAL','BILLER',0,'trns_bill');
+Insert into USSD.MODES (OPTION_NO,OPTION_NAME,S_TYPE,R_TYPE,CHARGES,SERVICE_ID) values (2,'Send Money','PERSONAL','PERSONAL',0,'trns_send');
+Insert into USSD.MODES (OPTION_NO,OPTION_NAME,S_TYPE,R_TYPE,CHARGES,SERVICE_ID) values (8,'PIN Reset','NULL','NULL',0,'pin');
+Insert into USSD.MODES (OPTION_NO,OPTION_NAME,S_TYPE,R_TYPE,CHARGES,SERVICE_ID) values (3,'Mobile Recharge','PERSONAL','RECHARGE',0,'trns_recharge');
+Insert into USSD.MODES (OPTION_NO,OPTION_NAME,S_TYPE,R_TYPE,CHARGES,SERVICE_ID) values (1,'Cash Out','PERSONAL','AGENT',0.015,'trns_cout');
+Insert into USSD.MODES (OPTION_NO,OPTION_NAME,S_TYPE,R_TYPE,CHARGES,SERVICE_ID) values (6,'EMI Payment','PERSONAL','MERCHANT',0,'trns_emi');
+Insert into USSD.MODES (OPTION_NO,OPTION_NAME,S_TYPE,R_TYPE,CHARGES,SERVICE_ID) values (7,'Account Information','NULL','NULL',0,'info');
+--------------------------------------------------------
+--  Constraints for Table MODES
+--------------------------------------------------------
+
+  ALTER TABLE "USSD"."MODES" MODIFY ("OPTION_NO" NOT NULL ENABLE);
+  ALTER TABLE "USSD"."MODES" MODIFY ("OPTION_NAME" NOT NULL ENABLE);
+  ALTER TABLE "USSD"."MODES" MODIFY ("S_TYPE" NOT NULL ENABLE);
+  ALTER TABLE "USSD"."MODES" MODIFY ("R_TYPE" NOT NULL ENABLE);
+  ALTER TABLE "USSD"."MODES" MODIFY ("CHARGES" NOT NULL ENABLE);
