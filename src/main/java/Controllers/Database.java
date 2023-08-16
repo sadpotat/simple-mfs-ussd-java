@@ -31,8 +31,7 @@ public class Database {
             System.out.println("getInstance");
             db.setAutoCommit(false);
             System.out.println("connected to db");
-        } catch (SQLException | NullPointerException s) {
-            System.out.println(s);
+        } catch (Exception s) {
             System.out.println("failed to connect to db");
         }
 
@@ -42,8 +41,7 @@ public class Database {
         if (db==null){
             try {
                 db = new Database(className, dbURL);
-            } catch (SQLException | ClassNotFoundException e){
-                System.out.println(e);
+            } catch (Exception e){
                 db = null;
             }
         }

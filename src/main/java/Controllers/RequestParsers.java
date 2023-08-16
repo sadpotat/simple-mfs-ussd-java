@@ -12,7 +12,6 @@ public class RequestParsers {
             String data = params.get(param);
             return Integer.parseInt(data);
         } catch (Exception e){
-            System.out.println(e);
             System.out.println("could not find " + param + " in request query");
             return -1;
         }
@@ -23,7 +22,6 @@ public class RequestParsers {
         try {
             return params.get(param).toLowerCase();
         } catch (Exception e){
-            System.out.println(e);
             System.out.println("could not find " + param + " in request query");
             return "";
         }

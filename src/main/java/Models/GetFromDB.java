@@ -1,41 +1,33 @@
 package Models;
 
-import Cache.TType;
-
 import java.sql.*;
 
 public class GetFromDB {
     private ResultSet rs;
     private final PreparedStatement getBalance;
     private final PreparedStatement getCustomerPS;
-    private final PreparedStatement getTModeObjFromService;
     private final PreparedStatement getLastSessionPS;
     private final PreparedStatement getLastNthInputPS;
     private final PreparedStatement verifyPINPS;
     private final PreparedStatement getProviderIDPS;
-    private final PreparedStatement getServiceClassPS;
 
     public GetFromDB(Connection conn) throws SQLException {
 
         // query strings
         String getBalanceQuery = "select * from balance where cus_id=?";
         String getCustomerQuery = "select * from customers where cus_id=?";
-        String getTModeObjFromServiceQuery = "select * from modes where service_id=?";
         String getLastSessionQuery = "select * from session_data where sim=? order by last_update DESC";
         String getLastNthInputQuery = "select uinput from session_log where session_id=? order by last_update desc OFFSET ? ROWS FETCH NEXT 1 ROWS ONLY";
         String verifyPINQuery = "select * from passwords where cus_id=? and password=?";
         String getProviderIDQuery = "select cus_id from customers where name=?";
-        String getServiceClassQuery = "select class from service_classes where service_id=?";
 
         // initialising prepared statements
         getBalance = conn.prepareStatement(getBalanceQuery);
         getCustomerPS = conn.prepareStatement(getCustomerQuery);
-        getTModeObjFromService = conn.prepareStatement(getTModeObjFromServiceQuery);
         getLastSessionPS = conn.prepareStatement(getLastSessionQuery);
         getLastNthInputPS = conn.prepareStatement(getLastNthInputQuery);
         verifyPINPS = conn.prepareStatement(verifyPINQuery);
         getProviderIDPS = conn.prepareStatement(getProviderIDQuery);
-        getServiceClassPS = conn.prepareStatement(getServiceClassQuery);
     }
 
     public double getBalance(int user) {

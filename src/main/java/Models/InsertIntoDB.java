@@ -1,7 +1,5 @@
 package Models;
 
-import Controllers.Database;
-
 import java.sql.*;
 
 public class InsertIntoDB {
