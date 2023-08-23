@@ -1,6 +1,7 @@
 package Controllers;
 
 import Cache.CacheLoader;
+import Helpers.Utils;
 import Models.InsertIntoDB;
 import Services.*;
 
@@ -40,6 +41,7 @@ public class SessionController {
         if (service.isAllowed(out)){
             service.execute();
             service.sendSuccessMessage(resp, out);
+            Database.commitChanges();
         }
     }
 

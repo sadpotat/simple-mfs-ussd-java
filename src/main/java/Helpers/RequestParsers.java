@@ -1,4 +1,4 @@
-package Controllers;
+package Helpers;
 
 
 import javax.servlet.http.HttpServletRequest;

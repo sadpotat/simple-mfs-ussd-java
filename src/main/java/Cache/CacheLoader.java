@@ -18,6 +18,8 @@ public class CacheLoader {
     private HashMap<String, String> menuResponses;
     private HashMap<String, String> serviceClassNames;
     private HashMap<String, String> providerName;
+    private HashMap<String, Provider> providerObjects;
+    private HashMap<String, MobileRechargeResponseKeys> MRResponseKeys;
     private static CacheLoader cache;
 
     public CacheLoader() throws SQLException {
@@ -27,7 +29,27 @@ public class CacheLoader {
         menuResponses = createMenuResponses();
         serviceClassNames = createServiceClasses();
         providerName = createProviders();
+        providerObjects = createProviderObjects();
         menuRegex = createMenuRegex();
+        MRResponseKeys = createMRResponsekeys();
+    }
+
+    private HashMap<String, MobileRechargeResponseKeys> createMRResponsekeys() throws SQLException {
+        rs = statement.executeQuery("select * from mr_response_keys");
+        HashMap<String, MobileRechargeResponseKeys> map = new HashMap<>();
+        MobileRechargeResponseKeys keys;
+
+        while(rs.next()){
+            keys = new MobileRechargeResponseKeys();
+            keys.setMessage(rs.getString("message").toLowerCase());
+            keys.setStatus(rs.getString("status").toLowerCase());
+            keys.setTrackingID(rs.getString("tracking_id").toLowerCase());
+            keys.setTime(rs.getString("time").toLowerCase());
+            keys.setStatus_ok(rs.getString("status_ok_if").toLowerCase());
+            map.put(rs.getString("api"), keys);
+        }
+
+        return map;
     }
 
     public static void cacheReload() throws SQLException {
@@ -54,6 +76,20 @@ public class CacheLoader {
 
         while (rs.next()){
             map.put(rs.getString("menu"), rs.getString("name"));
+        }
+        return map;
+    }
+
+    private HashMap<String, Provider> createProviderObjects() throws SQLException {
+        rs = statement.executeQuery("select * from provider_api");
+        HashMap<String, Provider> map = new HashMap<>();
+
+        while(rs.next()){
+            Provider provider = new Provider();
+            provider.setAPI(rs.getString("API"));
+            provider.setClassName(rs.getString("classname"));
+            provider.setReqType(rs.getString("req_type"));
+            map.put(rs.getString("name"), provider);
         }
         return map;
     }
@@ -188,5 +224,12 @@ public class CacheLoader {
 
     public TType getTType(String serviceID) {
         return modes.get(serviceID);
+    }
+
+    public MobileRechargeResponseKeys getMRResKeyObj(String API){
+        return MRResponseKeys.get(API);
+    }
+    public Provider getProviderObj(String providerName) {
+        return providerObjects.get(providerName);
     }
 }

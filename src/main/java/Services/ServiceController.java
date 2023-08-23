@@ -63,7 +63,7 @@ abstract class ServiceController implements Service{
 
     public boolean isAllowed(PrintWriter out) {
         // verifying if the user can make transactions
-        if (!receiverObj.getStatus().equals("ACTIVE")){
+        if (!senderObj.getStatus().equals("ACTIVE")){
             out.println("Cannot make transactions, your account is " + senderObj.getStatus());
             out.close();
             return false;
