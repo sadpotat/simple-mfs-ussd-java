@@ -9,4 +9,5 @@ public interface ReqBody {
     String getReceiver();
     void setAmount(String amount);
     String getAmount();
+    boolean hasNull();
 }

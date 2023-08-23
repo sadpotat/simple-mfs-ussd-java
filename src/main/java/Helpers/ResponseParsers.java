@@ -15,8 +15,9 @@ public class ResponseParsers {
 
     public static HashMap<String, String> mapResponse(String resBodyStr, String contentType){
         HashMap<String, String> map = new HashMap<>();
-        switch (contentType){
-            case "application/json":
+        String switchVal = contentType.contains("json") ? "1" : "2";
+        switch (switchVal){
+            case "1":
                 // removing starting and ending brackets
                 String[] keyValues = resBodyStr.split("[\\{\\}]")[1].split(",");
                 //
@@ -25,7 +26,7 @@ public class ResponseParsers {
                     map.put(keyValSeparated[0].strip().toLowerCase(), keyValSeparated[1].strip());
                 }
                 break;
-            case "text/xml":
+            case "2":
                 break;
         }
         return map;

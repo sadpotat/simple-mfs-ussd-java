@@ -40,8 +40,8 @@ public class SessionController {
         service.initialiseFromLog();
         if (service.isAllowed(out)){
             service.execute();
-            service.sendSuccessMessage(resp, out);
             Database.commitChanges();
+            service.sendSuccessMessage(resp, out);
         }
     }
 

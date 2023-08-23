@@ -13,18 +13,18 @@ import Middleware.MobileRecharge.Response.GeneralResponse;
 import Middleware.MobileRecharge.Response.ResponseBody;
 import Models.GetFromDB;
 import Cache.Provider;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.exceptions.UnirestException;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
+import java.net.HttpURLConnection;
 import java.sql.SQLException;
 import java.util.HashMap;
 
 public class MobileRecharge extends ServiceController {
     private final String serviceID = "trns_recharge";
     private String body;
+    private String providerName;
     private Provider providerObj;
     private MobileRechargeResponseKeys keys;
     private int sendMessage;
@@ -36,27 +36,11 @@ public class MobileRecharge extends ServiceController {
         // getting transaction info from log
         int amnt = LogController.getLastNthInputInt(sessionID,2);
         int rec = LogController.getLastNthInputInt(sessionID,3);
-        String providerName = getProviderName(sessionID);
+        providerName = getProviderName(sessionID);
         providerObj = cache.getProviderObj(providerName);
         keys = cache.getMRResKeyObj(providerObj.getAPI());
 
         updateFields(rec, amnt, serviceID);
-    }
-
-    public static int getProviderAcc(String sessionID){
-        CacheLoader cache = CacheLoader.getInstance();
-        GetFromDB getter = Database.getGetter();
-        // getting provider information from db
-        String simType = LogController.getLastNthInputInt(sessionID, 4)==1 ? "PREPAID": "POSTPAID";
-        String provider = LogController.getLastNthInputString(sessionID, 5);
-
-        try {
-            String providerName = cache.getProviderName(provider);
-            String name = providerName + "_" + simType;
-            return getter.getProviderID(name);
-        } catch (Exception e) {
-            return -1;
-        }
     }
 
     public static String getProviderName(String sessionID){
@@ -102,8 +86,17 @@ public class MobileRecharge extends ServiceController {
 
     @Override
     public void execute() throws SQLException {
+        System.out.println("execute() starts here");
+        // updating sender balance
+        updateBalance();
+
         // creating object for req body
         ReqBody reqBody = createReqBodyObj();
+
+        if (reqBody.hasNull()){
+            // will send internal server error at sendSuccessMessage
+            return;
+        }
 
         // parsing obj to string
         body = Utils.convertToFormattedString(reqBody, providerObj.getReqType());
@@ -111,13 +104,17 @@ public class MobileRecharge extends ServiceController {
         try{
             // connecting to the telco topup API
             String content = providerObj.getReqType().equals("json") ? "application/json" : "text/xml";
-            HttpResponse<String> httpResponse = HTTP.sendPostRequest(content, providerObj.getAPI(), body);
-            // getting the body of the response as a string
-            String resBody = httpResponse.getBody();
+            HttpURLConnection http = HTTP.sendPostRequest(content, providerObj.getAPI(), body);
+            // converting bytestream response to String
+            String resBody = HTTP.convertInputStream2String(http.getInputStream());
+
             // parsing the string into an object
-            String contentType = ResponseParsers.getContentType(httpResponse);
+            String contentType = http.getContentType();
             // parsing response to json objects
             ResponseBody response = parseToJsonObject(resBody, contentType);
+            System.out.println(response.getStatus());
+            System.out.println(keys.getStatus_ok());
+            response.getStatus().equals(keys.getStatus_ok());
 
             // insert new table in database for success messages and add it to cache //
             if (response==null){
@@ -126,21 +123,39 @@ public class MobileRecharge extends ServiceController {
             } else if (response.getStatus().equals(keys.getStatus_ok())) {
                 // success
                 sendMessage = 2;
-                // inserting data into transaction table
-                transact();
-                // updating sender balance
-                updateSenderBalance();
             } else {
                 // error at telco side
                 sendMessage = 1;
             }
-
+            // inserting data into transaction table
+            // down here because rollback does not affect insertions for some reason
+            transact();
+            Database.commitChanges();
+            System.out.println("database changes committed");
         } catch (Exception e) {
             Database.rollbackChanges();
         }
+    }
 
+    @Override
+    protected void updateBalance() throws SQLException {
+        // when the sender is an agent or a bank, balance is -1
 
+        // updating sender balance
+        if (getter.getBalance(sender)>0) updateSenderBalance();
 
+        // updating receiver balance
+        updateReceiverBalance();
+    }
+
+    @Override
+    protected void updateReceiverBalance() throws SQLException {
+        GetFromDB getter = Database.getGetter();
+        int providerWallet = getter.getProviderID(providerName);
+        updateReceiverBalance.setInt(1, providerWallet);
+        updateReceiverBalance.setDouble(2, amount);
+        updateReceiverBalance.setInt(3, providerWallet);
+        updateReceiverBalance.executeUpdate();
     }
 
     private ResponseBody parseToJsonObject(String resBodyStr, String contentType){
@@ -170,7 +185,7 @@ public class MobileRecharge extends ServiceController {
             // getting class constructor that takes specific argument types
             Constructor<?> constructor = clazz.getConstructor(String.class, String.class, String.class, String.class);
             // creating an instance using the constructor and provided arguments
-            Object[] arguments = {sessionID, "myMFS_" + Integer.toString(sender), Integer.toString(receiver), Double.toString(amount)};
+            Object[] arguments = {sessionID, "myMFS_" + sender, Integer.toString(receiver), Double.toString(amount)};
             reqBody = (ReqBody) constructor.newInstance(arguments);
         } catch (Exception e) {
             throw new RuntimeException(e);
