@@ -89,6 +89,7 @@ public class CacheLoader {
             provider.setAPI(rs.getString("API"));
             provider.setClassName(rs.getString("classname"));
             provider.setReqType(rs.getString("req_type"));
+            provider.setReqTemplate(rs.getString("req_template"));
             map.put(rs.getString("name"), provider);
         }
         return map;

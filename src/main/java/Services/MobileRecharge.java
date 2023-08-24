@@ -7,13 +7,11 @@ import Controllers.LogController;
 import Controllers.Responses;
 import Helpers.HTTP;
 import Helpers.ResponseParsers;
-import Helpers.Utils;
+import Middleware.MobileRecharge.Request.GeneralRequest;
 import Middleware.MobileRecharge.Request.ReqBody;
 import Middleware.MobileRecharge.Response.GeneralResponse;
-import Middleware.MobileRecharge.Response.ResponseBody;
 import Models.GetFromDB;
 import Cache.Provider;
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
@@ -90,21 +88,29 @@ public class MobileRecharge extends ServiceController {
         // updating sender balance
         updateBalance();
 
-        // creating object for req body
-        ReqBody reqBody = createReqBodyObj();
+        // creating object to be sent as request
+        GeneralRequest reqBody = new GeneralRequest(sessionID, "myMFS_" + sender,
+                Integer.toString(receiver), Double.toString(amount));
 
-        if (reqBody.hasNull()){
-            // will send internal server error at sendSuccessMessage
-            return;
-        }
+        // formatting the object to a String
+        String body = reqBody.getTemplateRequestString(providerObj.getReqTemplate());
 
-        // parsing obj to string
-        try {
-            body = Utils.convertToFormattedString(reqBody, providerObj.getReqType());
-        } catch (JsonProcessingException e) {
-            sendMessage=1;
-            return;
-        }
+
+//        // creating object for req body
+//        ReqBody reqBody = createReqBodyObj();
+//
+//        if (reqBody.hasNull()){
+//            // will send internal server error at sendSuccessMessage
+//            return;
+//        }
+//
+//        // parsing obj to string
+//        try {
+//            body = Utils.convertToFormattedString(reqBody, providerObj.getReqType());
+//        } catch (JsonProcessingException e) {
+//            sendMessage=1;
+//            return;
+//        }
 
         try{
             // connecting to the telco topup API
@@ -116,7 +122,7 @@ public class MobileRecharge extends ServiceController {
             // parsing the string into an object
             String contentType = http.getContentType();
             // parsing response to json objects
-            ResponseBody response = parseToJsonObject(resBody, contentType);
+            GeneralResponse response = parseToJsonObject(resBody, contentType);
 
             // insert new table in database for success messages and add it to cache //
             if (response==null){
@@ -159,8 +165,8 @@ public class MobileRecharge extends ServiceController {
         updateReceiverBalance.executeUpdate();
     }
 
-    private ResponseBody parseToJsonObject(String resBodyStr, String contentType){
-        ResponseBody responseBody = new GeneralResponse();
+    private GeneralResponse parseToJsonObject(String resBodyStr, String contentType){
+        GeneralResponse responseBody = new GeneralResponse();
         // parsing response to a hashmap
         HashMap<String, String> responseMap = ResponseParsers.mapResponse(resBodyStr, contentType);
         // getting key names from cache

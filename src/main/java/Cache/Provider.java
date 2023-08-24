@@ -3,7 +3,7 @@ package Cache;
 public class Provider {
     private String API;
     private String className;
-    private String resClassName;
+    private String reqTemplate;
     private String reqType;
 
     public String getAPI() {
@@ -30,11 +30,11 @@ public class Provider {
         this.reqType = reqType;
     }
 
-    public String getResClassName() {
-        return resClassName;
+    public String getReqTemplate() {
+        return reqTemplate;
     }
 
-    public void setResClassName(String resClassName) {
-        this.resClassName = resClassName;
+    public void setReqTemplate(String reqTemplate) {
+        this.reqTemplate = reqTemplate;
     }
 }
