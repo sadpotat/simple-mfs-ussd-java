@@ -2,6 +2,7 @@ package Helpers;
 
 import com.mashape.unirest.http.HttpResponse;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class ResponseParsers {
@@ -27,6 +28,17 @@ public class ResponseParsers {
                 }
                 break;
             case "2":
+                // removing brackets to separate tags
+                String noBrackets = resBodyStr.replaceAll(">\\s*<", "split_here");
+                String[] split1 = noBrackets.split("split_here");
+                // removing bracketing tag
+                String[] newArray = Arrays.copyOfRange (split1, 1, (split1.length)-1);
+                for(String tag: newArray){
+                    // removing brackets again so that elements are in the order:
+                    // starting_tag_1, value1, ending_tag_1, starting_tag_2, ....
+                    String [] subarr = tag.split(">|</");
+                    map.put(subarr[0], subarr[1]);
+                }
                 break;
         }
         return map;

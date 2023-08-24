@@ -88,7 +88,7 @@ public class MobileRecharge extends ServiceController {
     public void execute() throws SQLException {
         System.out.println("execute() starts here");
         // updating sender balance
-        updateBalance();
+//        updateBalance();
 
         // creating object for req body
         ReqBody reqBody = createReqBodyObj();
@@ -114,13 +114,12 @@ public class MobileRecharge extends ServiceController {
             ResponseBody response = parseToJsonObject(resBody, contentType);
             System.out.println(response.getStatus());
             System.out.println(keys.getStatus_ok());
-            response.getStatus().equals(keys.getStatus_ok());
 
             // insert new table in database for success messages and add it to cache //
             if (response==null){
                 // internal server error
                 sendMessage = 0;
-            } else if (response.getStatus().equals(keys.getStatus_ok())) {
+            } else if (response.getStatus().toLowerCase().equals(keys.getStatus_ok())) {
                 // success
                 sendMessage = 2;
             } else {
@@ -129,9 +128,9 @@ public class MobileRecharge extends ServiceController {
             }
             // inserting data into transaction table
             // down here because rollback does not affect insertions for some reason
-            transact();
-            Database.commitChanges();
-            System.out.println("database changes committed");
+//            transact();
+//            Database.commitChanges();
+//            System.out.println("database changes committed");
         } catch (Exception e) {
             Database.rollbackChanges();
         }
@@ -166,7 +165,6 @@ public class MobileRecharge extends ServiceController {
         try{
             System.out.println(keys.getMessage());
             System.out.println(responseMap.get(keys.getMessage()));
-            responseBody.setMessage("\"test\"");
             responseBody.setMessage(responseMap.get(keys.getMessage()));
             responseBody.setStatus(responseMap.get(keys.getStatus()));
             responseBody.setTrackingID(responseMap.get(keys.getTrackingID()));
