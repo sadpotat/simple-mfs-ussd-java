@@ -2,6 +2,8 @@ package Helpers;
 
 import Middleware.MobileRecharge.Request.ReqBody;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.google.gson.Gson;
@@ -43,7 +45,7 @@ public class Utils {
         return builder.toString();
     }
 
-    public static String convertToFormattedString(ReqBody reqBody, String content) {
+    public static String convertToFormattedString(ReqBody reqBody, String content) throws JsonProcessingException {
         //content should be either "json" or "xml"
         String body;
         if (content.contains("json")){

@@ -13,6 +13,7 @@ import Middleware.MobileRecharge.Response.GeneralResponse;
 import Middleware.MobileRecharge.Response.ResponseBody;
 import Models.GetFromDB;
 import Cache.Provider;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
@@ -86,9 +87,8 @@ public class MobileRecharge extends ServiceController {
 
     @Override
     public void execute() throws SQLException {
-        System.out.println("execute() starts here");
         // updating sender balance
-//        updateBalance();
+        updateBalance();
 
         // creating object for req body
         ReqBody reqBody = createReqBodyObj();
@@ -99,7 +99,12 @@ public class MobileRecharge extends ServiceController {
         }
 
         // parsing obj to string
-        body = Utils.convertToFormattedString(reqBody, providerObj.getReqType());
+        try {
+            body = Utils.convertToFormattedString(reqBody, providerObj.getReqType());
+        } catch (JsonProcessingException e) {
+            sendMessage=1;
+            return;
+        }
 
         try{
             // connecting to the telco topup API
@@ -112,8 +117,6 @@ public class MobileRecharge extends ServiceController {
             String contentType = http.getContentType();
             // parsing response to json objects
             ResponseBody response = parseToJsonObject(resBody, contentType);
-            System.out.println(response.getStatus());
-            System.out.println(keys.getStatus_ok());
 
             // insert new table in database for success messages and add it to cache //
             if (response==null){
@@ -128,9 +131,8 @@ public class MobileRecharge extends ServiceController {
             }
             // inserting data into transaction table
             // down here because rollback does not affect insertions for some reason
-//            transact();
-//            Database.commitChanges();
-//            System.out.println("database changes committed");
+            transact();
+            Database.commitChanges();
         } catch (Exception e) {
             Database.rollbackChanges();
         }
