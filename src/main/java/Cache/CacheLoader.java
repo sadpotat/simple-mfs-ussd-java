@@ -7,6 +7,7 @@ import Models.Regex;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class CacheLoader {
@@ -18,6 +19,7 @@ public class CacheLoader {
     private HashMap<String, String> menuResponses;
     private HashMap<String, String> serviceClassNames;
     private HashMap<String, String> providerName;
+    private HashMap<String, HashMap<String, String>> setterNames;
     private HashMap<String, Provider> providerObjects;
     private HashMap<String, MobileRechargeResponseKeys> MRResponseKeys;
     private static CacheLoader cache;
@@ -32,6 +34,31 @@ public class CacheLoader {
         providerObjects = createProviderObjects();
         menuRegex = createMenuRegex();
         MRResponseKeys = createMRResponsekeys();
+        setterNames = createSetterNames();
+    }
+
+    private HashMap<String, HashMap<String, String>> createSetterNames() throws SQLException {
+        ResultSet api = statement.executeQuery("select distinct api from api_response_keys");
+        // list of APIs in the table
+        ArrayList<String> apiList = new ArrayList<>();
+        while(api.next()){
+            apiList.add(api.getString("api"));
+        }
+
+        HashMap<String, HashMap<String, String>> map = new HashMap<>();
+        for(String API: apiList){
+            rs = statement.executeQuery("select key, setter from api_response_keys where api='" + API + "'");
+            HashMap<String, String> keyVals = new HashMap<>();
+            while(rs.next()){
+                keyVals.put(rs.getString("key"), rs.getString("setter"));
+            }
+            map.put(API, keyVals);
+        }
+        return map;
+    }
+
+    public HashMap<String, String> getSettersForAPI(String API){
+        return setterNames.get(API);
     }
 
     private HashMap<String, MobileRechargeResponseKeys> createMRResponsekeys() throws SQLException {

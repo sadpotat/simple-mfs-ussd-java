@@ -7,8 +7,8 @@ import Controllers.LogController;
 import Controllers.Responses;
 import Helpers.HTTP;
 import Helpers.ResponseParsers;
-import Middleware.MobileRecharge.Request.GeneralRequest;
-import Middleware.MobileRecharge.Response.GeneralResponse;
+import Middleware.Request.GeneralRequest;
+import Middleware.Response.GeneralResponse;
 import Models.GetFromDB;
 import Cache.Provider;
 
@@ -16,11 +16,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.sql.SQLException;
-import java.util.HashMap;
 
 public class MobileRecharge extends ServiceController {
     private final String serviceID = "trns_recharge";
-    private String body;
     private String providerName;
     private Provider providerObj;
     private MobileRechargeResponseKeys keys;
@@ -91,7 +89,7 @@ public class MobileRecharge extends ServiceController {
                 Integer.toString(receiver), Double.toString(amount));
 
         // formatting the object to a String
-        body = reqBody.getTemplateRequestString(providerObj.getReqTemplate());
+        String body = reqBody.getTemplateRequestString(providerObj.getReqTemplate());
 
         try{
             // connecting to the telco topup API
@@ -103,7 +101,7 @@ public class MobileRecharge extends ServiceController {
             // parsing the string into an object
             String contentType = http.getContentType();
             // parsing response to json objects
-            GeneralResponse response = parseToJsonObject(resBody, contentType);
+            GeneralResponse response = ResponseParsers.parseToJsonObject(providerObj.getAPI(), resBody, contentType);
 
             // insert new table in database for success messages and add it to cache //
             if (response==null){
@@ -145,26 +143,6 @@ public class MobileRecharge extends ServiceController {
         updateReceiverBalance.setInt(3, providerWallet);
         updateReceiverBalance.executeUpdate();
     }
-
-    private GeneralResponse parseToJsonObject(String resBodyStr, String contentType){
-        GeneralResponse responseBody = new GeneralResponse();
-        // parsing response to a hashmap
-        HashMap<String, String> responseMap = ResponseParsers.mapResponse(resBodyStr, contentType);
-        // getting key names from cache
-        try{
-            System.out.println(keys.getMessage());
-            System.out.println(responseMap.get(keys.getMessage()));
-            responseBody.setMessage(responseMap.get(keys.getMessage()));
-            responseBody.setStatus(responseMap.get(keys.getStatus()));
-            responseBody.setTrackingID(responseMap.get(keys.getTrackingID()));
-            responseBody.setTime(responseMap.get(keys.getTime()));
-        } catch (Exception e){
-            responseBody = null;
-        }
-
-        return responseBody;
-    }
-
     @Override
     public void sendSuccessMessage(HttpServletResponse resp, PrintWriter out) {
         if (sendMessage==0)

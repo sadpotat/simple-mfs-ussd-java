@@ -1,4 +1,4 @@
-package Middleware.MobileRecharge.Request;
+package Middleware.Request;
 
 public class GeneralRequest {
     private String trackingID;

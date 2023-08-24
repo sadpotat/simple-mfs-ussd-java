@@ -25,7 +25,7 @@ abstract class ServiceController implements Service{
     protected double amount;
     protected final String sessionID;
     protected TType tType;
-    CacheLoader cache;
+    protected CacheLoader cache;
 
     public ServiceController(String session_id, int initiator) {
         cache = CacheLoader.getInstance();

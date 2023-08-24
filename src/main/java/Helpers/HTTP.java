@@ -34,8 +34,7 @@ public class HTTP {
         for (int length; (length = inputStream.read(buffer)) != -1; ) {
             result.write(buffer, 0, length);
         }
-        String res =  result.toString("UTF-8");
-        return res;
+        return result.toString(StandardCharsets.UTF_8);
     }
 }
 

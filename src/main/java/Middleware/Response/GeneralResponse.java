@@ -1,4 +1,4 @@
-package Middleware.MobileRecharge.Response;
+package Middleware.Response;
 
 public class GeneralResponse{
     private String text;

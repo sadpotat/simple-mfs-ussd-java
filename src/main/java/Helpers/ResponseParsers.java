@@ -1,7 +1,10 @@
 package Helpers;
 
+import Cache.CacheLoader;
+import Middleware.Response.GeneralResponse;
 import com.mashape.unirest.http.HttpResponse;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -42,5 +45,26 @@ public class ResponseParsers {
                 break;
         }
         return map;
+    }
+
+    public static GeneralResponse parseToJsonObject(String API, String resBodyStr, String contentType){
+        GeneralResponse responseBody = new GeneralResponse();
+        // parsing response to a hashmap
+        HashMap<String, String> responseMap = mapResponse(resBodyStr, contentType);
+        // getting keys and their setters from cache
+        CacheLoader cache = CacheLoader.getInstance();
+        HashMap<String, String> setters = cache.getSettersForAPI(API);
+
+        Method method;
+        try{
+            for (String key: responseMap.keySet()) {
+                String setterName = setters.get(key);
+                method = responseBody.getClass().getMethod(setterName, String.class);
+                method.invoke(responseBody, responseMap.get(key));
+            }
+        } catch (Exception e){
+            responseBody = null;
+        }
+        return responseBody;
     }
 }
