@@ -1,14 +1,10 @@
 package Helpers;
-
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 
 

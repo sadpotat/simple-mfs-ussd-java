@@ -8,14 +8,12 @@ import Controllers.Responses;
 import Helpers.HTTP;
 import Helpers.ResponseParsers;
 import Middleware.MobileRecharge.Request.GeneralRequest;
-import Middleware.MobileRecharge.Request.ReqBody;
 import Middleware.MobileRecharge.Response.GeneralResponse;
 import Models.GetFromDB;
 import Cache.Provider;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
-import java.lang.reflect.Constructor;
 import java.net.HttpURLConnection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -93,24 +91,7 @@ public class MobileRecharge extends ServiceController {
                 Integer.toString(receiver), Double.toString(amount));
 
         // formatting the object to a String
-        String body = reqBody.getTemplateRequestString(providerObj.getReqTemplate());
-
-
-//        // creating object for req body
-//        ReqBody reqBody = createReqBodyObj();
-//
-//        if (reqBody.hasNull()){
-//            // will send internal server error at sendSuccessMessage
-//            return;
-//        }
-//
-//        // parsing obj to string
-//        try {
-//            body = Utils.convertToFormattedString(reqBody, providerObj.getReqType());
-//        } catch (JsonProcessingException e) {
-//            sendMessage=1;
-//            return;
-//        }
+        body = reqBody.getTemplateRequestString(providerObj.getReqTemplate());
 
         try{
             // connecting to the telco topup API
@@ -182,21 +163,6 @@ public class MobileRecharge extends ServiceController {
         }
 
         return responseBody;
-    }
-    private ReqBody createReqBodyObj() {
-        Class<?> clazz;
-        ReqBody reqBody;
-        try {
-            clazz = Class.forName(providerObj.getClassName());
-            // getting class constructor that takes specific argument types
-            Constructor<?> constructor = clazz.getConstructor(String.class, String.class, String.class, String.class);
-            // creating an instance using the constructor and provided arguments
-            Object[] arguments = {sessionID, "myMFS_" + sender, Integer.toString(receiver), Double.toString(amount)};
-            reqBody = (ReqBody) constructor.newInstance(arguments);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return reqBody;
     }
 
     @Override
