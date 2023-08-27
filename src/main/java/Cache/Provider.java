@@ -2,7 +2,6 @@ package Cache;
 
 public class Provider {
     private String ApiId;
-    private String className;
     private String reqTemplate;
     private String reqType;
 
@@ -12,14 +11,6 @@ public class Provider {
 
     public void setApiId(String apiId) {
         this.ApiId = apiId;
-    }
-
-    public String getClassName() {
-        return className;
-    }
-
-    public void setClassName(String className) {
-        this.className = className;
     }
 
     public String getReqType() {

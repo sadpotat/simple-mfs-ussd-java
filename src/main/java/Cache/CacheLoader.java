@@ -130,7 +130,6 @@ public class CacheLoader {
         while(rs.next()){
             Provider provider = new Provider();
             provider.setApiId(rs.getString("API"));
-            provider.setClassName(rs.getString("classname"));
             provider.setReqType(rs.getString("req_type"));
             provider.setReqTemplate(rs.getString("req_template"));
             map.put(rs.getString("name"), provider);
