@@ -25,7 +25,7 @@ public class SessionController {
         }
     }
 
-    public static void processRequest(HttpServletResponse resp, PrintWriter out, int initiator, String sessionID, String serviceID) throws SQLException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, NullPointerException {
+    public static void processRequest(HttpServletResponse resp, PrintWriter out, int initiator, String sessionID, String serviceID) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, NullPointerException {
         CacheLoader cache = CacheLoader.getInstance();
         String className = cache.getServiceClassName(serviceID);
         Class<?> clazz = Class.forName(className);

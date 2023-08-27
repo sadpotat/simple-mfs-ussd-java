@@ -13,7 +13,7 @@ import java.sql.SQLException;
 
 public class CacheReloader extends HttpServlet {
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("text/html");
         resp.setStatus(200);
         PrintWriter out = resp.getWriter();

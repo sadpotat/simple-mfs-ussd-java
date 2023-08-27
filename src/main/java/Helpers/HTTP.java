@@ -1,5 +1,4 @@
 package Helpers;
-import com.mashape.unirest.http.exceptions.UnirestException;
 
 import java.io.*;
 import java.net.HttpURLConnection;

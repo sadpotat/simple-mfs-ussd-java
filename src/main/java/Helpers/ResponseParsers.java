@@ -6,18 +6,9 @@ import org.json.JSONObject;
 import org.json.XML;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashMap;
 
 public class ResponseParsers {
-//    public static String getContentType(HttpResponse<String> httpResponse){
-//        // getting the object that contains content type
-//        Object obj = httpResponse.getHeaders().values().toArray()[4];
-//        // splitting characters to separate the contents string
-//        String[] str = obj.toString().split("[\\[;\\]]");
-//        return str[1];
-//    }
-
     public static HashMap<String, Object> mapResponse(String API, String resBodyStr, String contentType){
         CacheLoader cache = CacheLoader.getInstance();
         String switchVal = contentType.contains("json") ? "1" : "2";
