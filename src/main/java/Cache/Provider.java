@@ -1,17 +1,17 @@
 package Cache;
 
 public class Provider {
-    private String API;
+    private String ApiId;
     private String className;
     private String reqTemplate;
     private String reqType;
 
-    public String getAPI() {
-        return API;
+    public String getApiId() {
+        return ApiId;
     }
 
-    public void setAPI(String API) {
-        this.API = API;
+    public void setApiId(String apiId) {
+        this.ApiId = apiId;
     }
 
     public String getClassName() {

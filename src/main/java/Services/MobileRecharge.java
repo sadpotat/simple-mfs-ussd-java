@@ -33,7 +33,7 @@ public class MobileRecharge extends ServiceController {
         int rec = LogController.getLastNthInputInt(sessionID,3);
         providerName = getProviderName(sessionID);
         providerObj = cache.getProviderObj(providerName);
-        keys = cache.getMRResKeyObj(providerObj.getAPI());
+        keys = cache.getMRResKeyObj(providerObj.getApiId());
 
         updateFields(rec, amnt, serviceID);
     }
@@ -94,14 +94,15 @@ public class MobileRecharge extends ServiceController {
         try{
             // connecting to the telco topup API
             String content = providerObj.getReqType().equals("json") ? "application/json" : "text/xml";
-            HttpURLConnection http = HTTP.sendPostRequest(content, providerObj.getAPI(), body);
+            String URL = cache.getUrlFromApiId(providerObj.getApiId());
+            HttpURLConnection http = HTTP.sendPostRequest(content, URL, body);
             // converting bytestream response to String
             String resBody = HTTP.convertInputStream2String(http.getInputStream());
 
             // parsing the string into an object
             String contentType = http.getContentType();
             // parsing response to json objects
-            GeneralResponse response = ResponseParsers.parseToJsonObject(providerObj.getAPI(), resBody, contentType);
+            GeneralResponse response = ResponseParsers.parseToJsonObject(providerObj.getApiId(), resBody, contentType);
 
             // insert new table in database for success messages and add it to cache //
             if (response==null){

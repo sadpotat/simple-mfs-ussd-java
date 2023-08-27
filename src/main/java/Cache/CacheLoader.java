@@ -22,6 +22,7 @@ public class CacheLoader {
     private HashMap<String, HashMap<String, String>> setterNames;
     private HashMap<String, Provider> providerObjects;
     private HashMap<String, MobileRechargeResponseKeys> MRResponseKeys;
+    private HashMap<String, String> APIURLS;
     private static CacheLoader cache;
 
     public CacheLoader() throws SQLException {
@@ -35,6 +36,20 @@ public class CacheLoader {
         menuRegex = createMenuRegex();
         MRResponseKeys = createMRResponsekeys();
         setterNames = createSetterNames();
+        APIURLS = createAPIURLS();
+    }
+
+    private HashMap<String, String> createAPIURLS() throws SQLException {
+        rs = statement.executeQuery("select * from integrated_apis");
+        HashMap<String, String> map = new HashMap<>();
+        while (rs.next()){
+            map.put(rs.getString("id"), rs.getString("url"));
+        }
+        return map;
+    }
+
+    public String getUrlFromApiId(String id){
+        return APIURLS.get(id);
     }
 
     private HashMap<String, HashMap<String, String>> createSetterNames() throws SQLException {
@@ -114,7 +129,7 @@ public class CacheLoader {
 
         while(rs.next()){
             Provider provider = new Provider();
-            provider.setAPI(rs.getString("API"));
+            provider.setApiId(rs.getString("API"));
             provider.setClassName(rs.getString("classname"));
             provider.setReqType(rs.getString("req_type"));
             provider.setReqTemplate(rs.getString("req_template"));
