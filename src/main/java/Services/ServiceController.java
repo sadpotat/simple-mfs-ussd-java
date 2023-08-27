@@ -154,6 +154,7 @@ abstract class ServiceController implements Service{
 
     public void sendSuccessMessage(HttpServletResponse resp, PrintWriter out){
         resp.setStatus(200);
+        resp.setContentType("text/plain");
         out.println("Transacted Successfully");
         out.close();
     }

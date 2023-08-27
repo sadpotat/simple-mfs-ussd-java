@@ -14,7 +14,9 @@ import java.time.format.DateTimeFormatter;
 
 public class SendStatement extends ServiceController {
     private ResultSet pastTransactions;
+    private String miniStatement;
     private final String serviceID = "info_statement";
+    private int sendMessage;
 
     public SendStatement(String session_id, int initiator){
         super(session_id, initiator);
@@ -40,30 +42,45 @@ public class SendStatement extends ServiceController {
         Statement statement = conn.createStatement();
         String getTransactionsQuery = "select type, receiver_id, amount, time from transactions where sender_id=" + sender + " order by trans_number desc";
         pastTransactions = statement.executeQuery(getTransactionsQuery);
-    }
 
-    @Override
-    public void sendSuccessMessage(HttpServletResponse resp, PrintWriter out){
-        resp.setStatus(200);
+        StringBuilder sb = new StringBuilder();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
         try{
             for(int i=0; i<10; i++){
                 if(pastTransactions.next())
-                    out.println(pastTransactions.getTimestamp("time").toLocalDateTime().format(formatter) +
-                            ": " + pastTransactions.getString("type") +
-                            " - " + pastTransactions.getString("receiver_id") +
-                            " - " + pastTransactions.getString("amount"));
-                else
-                if (i==0)
-                    out.println("No transaction history found");
-                else
-                    break;
+                    sb.append(pastTransactions.getTimestamp("time").toLocalDateTime().format(formatter))
+                            .append(": ")
+                            .append(pastTransactions.getString("type"))
+                            .append(" - ")
+                            .append(pastTransactions.getString("receiver_id"))
+                            .append(" - ")
+                            .append(pastTransactions.getString("amount"));
+                else{
+                    if (i==0)
+                        sb.append("No transaction history found");
+                    else
+                        break;
+                }
             }
-            out.close();
+            miniStatement = sb.toString();
+            sendMessage = 1;
         } catch (SQLException e) {
+            sendMessage = 0;
             System.out.println("failed to get statement");
-            Responses.internalServerError(resp, out);
         }
+
+
+    }
+
+    @Override
+    public void sendSuccessMessage(HttpServletResponse resp, PrintWriter out){
+        if (sendMessage==1){
+            resp.setStatus(200);
+            resp.setContentType("text/plain");
+            out.println(miniStatement);
+            out.close();
+        } else
+            Responses.internalServerError(resp, out);
     }
 
 }

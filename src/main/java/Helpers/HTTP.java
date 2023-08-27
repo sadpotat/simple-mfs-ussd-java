@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 
 
 public class HTTP {
-    public static HttpURLConnection sendPostRequest(String content, String API, String body) throws UnirestException, IOException {
+    public static HttpURLConnection sendPostRequest(String content, String API, String body) throws IOException {
         URL url = new URL(API);
         URLConnection con = url.openConnection();
         HttpURLConnection http = (HttpURLConnection)con;

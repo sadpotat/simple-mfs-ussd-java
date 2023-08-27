@@ -36,12 +36,16 @@ public class SessionController {
         Object[] arguments = {sessionID, initiator};
         Service service = (Service) constructor.newInstance(arguments);
 
-        // running the service
-        service.initialiseFromLog();
-        if (service.isAllowed(out)){
-            service.execute();
-            Database.commitChanges();
-            service.sendSuccessMessage(resp, out);
+        try{
+            // running the service
+            service.initialiseFromLog();
+            if (service.isAllowed(out)){
+                service.execute();
+                Database.commitChanges();
+                service.sendSuccessMessage(resp, out);
+            }
+        } catch (Exception e) {
+            Responses.internalServerError(resp, out);
         }
     }
 

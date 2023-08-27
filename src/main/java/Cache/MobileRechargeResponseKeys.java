@@ -5,6 +5,7 @@ public class MobileRechargeResponseKeys {
     private String status;
     private String trackingID;
     private String time;
+    private String xmlRoot;
 
     private String status_ok;
 
@@ -46,5 +47,13 @@ public class MobileRechargeResponseKeys {
 
     public void setStatus_ok(String status_ok) {
         this.status_ok = status_ok;
+    }
+
+    public String getXmlRoot() {
+        return xmlRoot;
+    }
+
+    public void setXmlRoot(String xmlRoot) {
+        this.xmlRoot = xmlRoot;
     }
 }

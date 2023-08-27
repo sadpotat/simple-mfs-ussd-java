@@ -107,7 +107,7 @@ public class MobileRecharge extends ServiceController {
             if (response==null){
                 // internal server error
                 sendMessage = 0;
-            } else if (response.getStatus().toLowerCase().equals(keys.getStatus_ok())) {
+            } else if (response.getStatus().equals(keys.getStatus_ok())) {
                 // success
                 sendMessage = 2;
             } else {
@@ -145,11 +145,14 @@ public class MobileRecharge extends ServiceController {
     }
     @Override
     public void sendSuccessMessage(HttpServletResponse resp, PrintWriter out) {
+        resp.setContentType("text/plain");
         if (sendMessage==0)
             Responses.internalServerError(resp, out);
         else if (sendMessage==2){
+            resp.setStatus(200);
             out.println("Mobile recharged successfully");
         } else {
+            resp.setStatus(500);
             out.println("Failed to recharge mobile number");
         }
         out.close();

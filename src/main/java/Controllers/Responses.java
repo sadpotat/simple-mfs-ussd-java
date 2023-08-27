@@ -7,6 +7,7 @@ public class Responses {
 
     public static void internalServerError(HttpServletResponse resp, PrintWriter out){
         resp.setStatus(500);
+        resp.setContentType("text/plain");
         out.println("Internal Server Error");
         out.close();
     }

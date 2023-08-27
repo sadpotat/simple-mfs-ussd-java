@@ -68,11 +68,12 @@ public class CacheLoader {
 
         while(rs.next()){
             keys = new MobileRechargeResponseKeys();
-            keys.setMessage(rs.getString("message").toLowerCase());
-            keys.setStatus(rs.getString("status").toLowerCase());
-            keys.setTrackingID(rs.getString("tracking_id").toLowerCase());
-            keys.setTime(rs.getString("time").toLowerCase());
-            keys.setStatus_ok(rs.getString("status_ok_if").toLowerCase());
+            keys.setMessage(rs.getString("message"));
+            keys.setStatus(rs.getString("status"));
+            keys.setTrackingID(rs.getString("tracking_id"));
+            keys.setTime(rs.getString("time"));
+            keys.setStatus_ok(rs.getString("status_ok_if"));
+            keys.setXmlRoot(rs.getString("xml_root"));
             map.put(rs.getString("api"), keys);
         }
 
@@ -259,5 +260,9 @@ public class CacheLoader {
     }
     public Provider getProviderObj(String providerName) {
         return providerObjects.get(providerName);
+    }
+
+    public String getXmlResponseRoot(String api) {
+        return MRResponseKeys.get(api).getXmlRoot();
     }
 }
