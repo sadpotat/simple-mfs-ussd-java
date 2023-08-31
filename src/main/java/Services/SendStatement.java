@@ -54,7 +54,8 @@ public class SendStatement extends ServiceController {
                             .append(" - ")
                             .append(pastTransactions.getString("receiver_id"))
                             .append(" - ")
-                            .append(pastTransactions.getString("amount"));
+                            .append(pastTransactions.getString("amount"))
+                            .append("\n");
                 else{
                     if (i==0)
                         sb.append("No transaction history found");
