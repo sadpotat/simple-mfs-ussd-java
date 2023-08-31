@@ -43,7 +43,7 @@ Services for personal accounts have been implemented. The application provides:
 2. Send Money
 3. Mobile Recharge
    - integrated Telco APIs that send dummy responses
-   - needs dummy-telco-server-for-simple-ussd to be deployed on another port to function
+   - needs [dummy-telco-server-for-simple-ussd](https://github.com/sadpotat/dummy-telco-server-for-simple-ussd.git) to be deployed on another port to function
 4. Payment
 5. Bill Pay
 6. EMI payment
