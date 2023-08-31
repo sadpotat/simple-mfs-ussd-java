@@ -21,7 +21,7 @@ public class CacheLoader {
     private HashMap<String, String> providerName;
     private HashMap<String, HashMap<String, String>> setterNames;
     private HashMap<String, Provider> providerObjects;
-    private HashMap<String, MobileRechargeResponseKeys> MRResponseKeys;
+    private HashMap<String, Status> statusOkayMessages;
     private HashMap<String, String> APIURLS;
     private static CacheLoader cache;
 
@@ -34,7 +34,7 @@ public class CacheLoader {
         providerName = createProviders();
         providerObjects = createProviderObjects();
         menuRegex = createMenuRegex();
-        MRResponseKeys = createMRResponsekeys();
+        statusOkayMessages = createStatusOkayMessages();
         setterNames = createSetterNames();
         APIURLS = createAPIURLS();
     }
@@ -53,7 +53,7 @@ public class CacheLoader {
     }
 
     private HashMap<String, HashMap<String, String>> createSetterNames() throws SQLException {
-        ResultSet api = statement.executeQuery("select distinct api from api_response_keys");
+        ResultSet api = statement.executeQuery("select distinct api from API_RESPONSE_VALUE_SETTERS");
         // list of APIs in the table
         ArrayList<String> apiList = new ArrayList<>();
         while(api.next()){
@@ -62,7 +62,7 @@ public class CacheLoader {
 
         HashMap<String, HashMap<String, String>> map = new HashMap<>();
         for(String API: apiList){
-            rs = statement.executeQuery("select key, setter from api_response_keys where api='" + API + "'");
+            rs = statement.executeQuery("select key, setter from API_RESPONSE_VALUE_SETTERS where api='" + API + "'");
             HashMap<String, String> keyVals = new HashMap<>();
             while(rs.next()){
                 keyVals.put(rs.getString("key"), rs.getString("setter"));
@@ -76,17 +76,13 @@ public class CacheLoader {
         return setterNames.get(API);
     }
 
-    private HashMap<String, MobileRechargeResponseKeys> createMRResponsekeys() throws SQLException {
-        rs = statement.executeQuery("select * from mr_response_keys");
-        HashMap<String, MobileRechargeResponseKeys> map = new HashMap<>();
-        MobileRechargeResponseKeys keys;
+    private HashMap<String, Status> createStatusOkayMessages() throws SQLException {
+        rs = statement.executeQuery("select * from API_STATUS_VALUES");
+        HashMap<String, Status> map = new HashMap<>();
+        Status keys;
 
         while(rs.next()){
-            keys = new MobileRechargeResponseKeys();
-            keys.setMessage(rs.getString("message"));
-            keys.setStatus(rs.getString("status"));
-            keys.setTrackingID(rs.getString("tracking_id"));
-            keys.setTime(rs.getString("time"));
+            keys = new Status();
             keys.setStatus_ok(rs.getString("status_ok_if"));
             keys.setXmlRoot(rs.getString("xml_root"));
             map.put(rs.getString("api"), keys);
@@ -124,7 +120,7 @@ public class CacheLoader {
     }
 
     private HashMap<String, Provider> createProviderObjects() throws SQLException {
-        rs = statement.executeQuery("select * from provider_api");
+        rs = statement.executeQuery("select * from provider_request");
         HashMap<String, Provider> map = new HashMap<>();
 
         while(rs.next()){
@@ -132,6 +128,7 @@ public class CacheLoader {
             provider.setApiId(rs.getString("API"));
             provider.setReqType(rs.getString("req_type"));
             provider.setReqTemplate(rs.getString("req_template"));
+            provider.setReqMethod(rs.getString("method"));
             map.put(rs.getString("name"), provider);
         }
         return map;
@@ -269,14 +266,14 @@ public class CacheLoader {
         return modes.get(serviceID);
     }
 
-    public MobileRechargeResponseKeys getMRResKeyObj(String API){
-        return MRResponseKeys.get(API);
+    public Status getMRResKeyObj(String API){
+        return statusOkayMessages.get(API);
     }
     public Provider getProviderObj(String providerName) {
         return providerObjects.get(providerName);
     }
 
     public String getXmlResponseRoot(String api) {
-        return MRResponseKeys.get(api).getXmlRoot();
+        return statusOkayMessages.get(api).getXmlRoot();
     }
 }

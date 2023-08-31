@@ -8,11 +8,11 @@ import java.nio.charset.StandardCharsets;
 
 
 public class HTTP {
-    public static HttpURLConnection sendPostRequest(String content, String API, String body) throws IOException {
+    public static HttpURLConnection sendRequest(String content, String API, String reqMethod, String body) throws IOException {
         URL url = new URL(API);
         URLConnection con = url.openConnection();
         HttpURLConnection http = (HttpURLConnection)con;
-        http.setRequestMethod("POST"); // PUT is another valid option
+        http.setRequestMethod(reqMethod); // PUT is another valid option
         http.setDoOutput(true);
 
         byte[] out = body.getBytes(StandardCharsets.UTF_8);

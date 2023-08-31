@@ -1,7 +1,7 @@
 package Services;
 
 import Cache.CacheLoader;
-import Cache.MobileRechargeResponseKeys;
+import Cache.Status;
 import Controllers.Database;
 import Controllers.LogController;
 import Controllers.Responses;
@@ -21,7 +21,7 @@ public class MobileRecharge extends ServiceController {
     private final String serviceID = "trns_recharge";
     private String providerName;
     private Provider providerObj;
-    private MobileRechargeResponseKeys keys;
+    private Status keys;
     private int sendMessage;
     public MobileRecharge(String session_id, int initiator) {
         super(session_id, initiator);
@@ -93,9 +93,10 @@ public class MobileRecharge extends ServiceController {
 
         try{
             // connecting to the telco topup API
-            String content = providerObj.getReqType().equals("json") ? "application/json" : "text/xml";
+            String content = providerObj.getReqType();
             String URL = cache.getUrlFromApiId(providerObj.getApiId());
-            HttpURLConnection http = HTTP.sendPostRequest(content, URL, body);
+            String reqMethod = providerObj.getReqMethod();
+            HttpURLConnection http = HTTP.sendRequest(content, URL, reqMethod, body);
             // converting bytestream response to String
             String resBody = HTTP.convertInputStream2String(http.getInputStream());
 

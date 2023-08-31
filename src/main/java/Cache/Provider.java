@@ -4,6 +4,15 @@ public class Provider {
     private String ApiId;
     private String reqTemplate;
     private String reqType;
+    private String reqMethod;
+
+    public String getReqMethod() {
+        return reqMethod;
+    }
+
+    public void setReqMethod(String reqMethod) {
+        this.reqMethod = reqMethod;
+    }
 
     public String getApiId() {
         return ApiId;
