@@ -58,10 +58,4 @@ public class InsertIntoDB {
         updatePINPS.executeUpdate();
     }
 
-    public void updateReceiverInTLog(String sessionID, int receiver) throws SQLException {
-        updateReceiverinTLogPS.setInt(1, receiver);
-        updateReceiverinTLogPS.setString(2, sessionID);
-        updateReceiverinTLogPS.executeUpdate();
-    }
-
 }
