@@ -25,7 +25,7 @@ public class PINChange extends ServiceController {
     }
 
     @Override
-    public boolean isAllowed(PrintWriter out){
+    public boolean isAllowed(HttpServletResponse resp, PrintWriter out){
         // checking if old pin is okay
         if (!verifyPIN(sender, PIN)) {
             out.println("Wrong PIN");

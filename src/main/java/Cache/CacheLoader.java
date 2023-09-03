@@ -18,7 +18,6 @@ public class CacheLoader {
     private HashMap<String, TType> modes;
     private HashMap<String, String> menuResponses;
     private HashMap<String, String> serviceClassNames;
-    private HashMap<String, String> providerName;
     private HashMap<String, HashMap<String, String>> setterNames;
     private HashMap<String, Provider> providerObjects;
     private HashMap<String, Status> statusOkayMessages;
@@ -31,7 +30,6 @@ public class CacheLoader {
         modes = createModes();
         menuResponses = createMenuResponses();
         serviceClassNames = createServiceClasses();
-        providerName = createProviders();
         providerObjects = createProviderObjects();
         menuRegex = createMenuRegex();
         statusOkayMessages = createStatusOkayMessages();
@@ -65,7 +63,7 @@ public class CacheLoader {
             rs = statement.executeQuery("select key, setter from API_RESPONSE_VALUE_SETTERS where api='" + API + "'");
             HashMap<String, String> keyVals = new HashMap<>();
             while(rs.next()){
-                keyVals.put(rs.getString("key"), rs.getString("setter"));
+                keyVals.put(API+rs.getString("key"), rs.getString("setter"));
             }
             map.put(API, keyVals);
         }
@@ -109,27 +107,17 @@ public class CacheLoader {
         return map;
     }
 
-    private HashMap<String, String> createProviders() throws SQLException {
-        rs = statement.executeQuery("select * from provider");
-        HashMap<String, String> map = new HashMap<>();
-
-        while (rs.next()){
-            map.put(rs.getString("menu"), rs.getString("name"));
-        }
-        return map;
-    }
-
     private HashMap<String, Provider> createProviderObjects() throws SQLException {
-        rs = statement.executeQuery("select * from provider_request");
+        rs = statement.executeQuery("select * from provider left join request_data on provider.api_id = request_data.api");
         HashMap<String, Provider> map = new HashMap<>();
 
         while(rs.next()){
             Provider provider = new Provider();
-            provider.setApiId(rs.getString("API"));
+            provider.setApiId(rs.getString("API_ID"));
             provider.setReqType(rs.getString("req_type"));
             provider.setReqTemplate(rs.getString("req_template"));
             provider.setReqMethod(rs.getString("method"));
-            map.put(rs.getString("name"), provider);
+            map.put(rs.getString("menu"), provider);
         }
         return map;
     }
@@ -169,8 +157,7 @@ public class CacheLoader {
         TType mode;
 
         while(rs.next()){
-            mode = new TType(rs.getInt("option_no"),
-                    rs.getString("option_name"),
+            mode = new TType(rs.getString("option_name"),
                     rs.getString("s_type"),
                     rs.getString("r_type"),
                     rs.getDouble("charges"));
@@ -258,22 +245,22 @@ public class CacheLoader {
         return serviceClassNames.get(serviceID);
     }
 
-    public String getProviderName(String option) {
-        return providerName.get(option);
-    }
-
     public TType getTType(String serviceID) {
         return modes.get(serviceID);
     }
 
-    public Status getMRResKeyObj(String API){
+    public Status getStatusObj(String API){
         return statusOkayMessages.get(API);
     }
-    public Provider getProviderObj(String providerName) {
-        return providerObjects.get(providerName);
+    public Provider getProviderObj(String menu) {
+        return providerObjects.get(menu);
     }
 
     public String getXmlResponseRoot(String api) {
         return statusOkayMessages.get(api).getXmlRoot();
+    }
+
+    public String getStatusOkayMsg(String apiId) {
+        return statusOkayMessages.get(apiId).getStatus_ok();
     }
 }

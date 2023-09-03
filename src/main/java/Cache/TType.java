@@ -1,7 +1,6 @@
 package Cache;
 
 public class TType {
-    private int optionNum;
     private String optionName;
     private String s_type;
     private String r_type;
@@ -10,20 +9,11 @@ public class TType {
     public TType() {
     }
 
-    public TType(int optionNum, String optionName, String s_type, String r_type, double charges) {
-        this.optionNum = optionNum;
+    public TType(String optionName, String s_type, String r_type, double charges) {
         this.optionName = optionName;
         this.s_type = s_type;
         this.r_type = r_type;
         this.charges = charges;
-    }
-
-    public int getOptionNum() {
-        return optionNum;
-    }
-
-    public void setOptionNum(int optionNum) {
-        this.optionNum = optionNum;
     }
 
     public String getOptionName() {

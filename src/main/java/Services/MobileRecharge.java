@@ -1,6 +1,5 @@
 package Services;
 
-import Cache.CacheLoader;
 import Cache.Status;
 import Controllers.Database;
 import Controllers.LogController;
@@ -19,9 +18,9 @@ import java.sql.SQLException;
 
 public class MobileRecharge extends ServiceController {
     private final String serviceID = "trns_recharge";
-    private String providerName;
+    private String providerMenu;
     private Provider providerObj;
-    private Status keys;
+    private String statusOkayMsg;
     private int sendMessage;
     public MobileRecharge(String session_id, int initiator) {
         super(session_id, initiator);
@@ -31,39 +30,44 @@ public class MobileRecharge extends ServiceController {
         // getting transaction info from log
         int amnt = LogController.getLastNthInputInt(sessionID,2);
         int rec = LogController.getLastNthInputInt(sessionID,3);
-        providerName = getProviderName(sessionID);
-        providerObj = cache.getProviderObj(providerName);
-        keys = cache.getMRResKeyObj(providerObj.getApiId());
+        providerMenu = getProviderMenuNo(sessionID);
+        providerObj = cache.getProviderObj(providerMenu);
+        statusOkayMsg = cache.getStatusOkayMsg(providerObj.getApiId());
 
         updateFields(rec, amnt, serviceID);
     }
 
-    public static String getProviderName(String sessionID){
-        CacheLoader cache = CacheLoader.getInstance();
+    public static String getProviderMenuNo(String sessionID){
         // getting provider information from db
-        String simType = LogController.getLastNthInputInt(sessionID, 4)==1 ? "PREPAID": "POSTPAID";
-        String provider = LogController.getLastNthInputString(sessionID, 5);
-
         try {
-            String providerName = cache.getProviderName(provider);
-            return providerName + "_" + simType;
+            String simType = LogController.getLastNthInputString(sessionID, 4);
+            String providerNum = LogController.getLastNthInputString(sessionID, 5);
+            return providerNum + simType;
         } catch (Exception e) {
-            return null;
+            return "";
         }
     }
 
     @Override
-    public boolean isAllowed(PrintWriter out) {
+    public boolean isAllowed(HttpServletResponse resp, PrintWriter out) {
         // verifying if the user can make transactions
         if (!senderObj.getStatus().equals("ACTIVE")){
+            resp.setStatus(403);
             out.println("Cannot make transactions, your account is " + senderObj.getStatus());
             out.close();
+            return false;
+        }
+
+        // in case failed to fetch providerObj
+        if (providerObj==null){
+            Responses.internalServerError(resp, out);
             return false;
         }
 
         // verifying PIN
         int hash = LogController.getLastNthInputInt(sessionID,1);
         if (!verifyPIN(sender, hash)) {
+            resp.setStatus(400);
             out.println("Wrong PIN");
             out.close();
             return false;
@@ -71,6 +75,7 @@ public class MobileRecharge extends ServiceController {
 
         // checking if the amount can be transacted
         if (!amountIsInBalance()){
+            resp.setStatus(403);
             out.println("Insufficient balance");
             out.close();
             return false;
@@ -109,7 +114,7 @@ public class MobileRecharge extends ServiceController {
             if (response==null){
                 // internal server error
                 sendMessage = 0;
-            } else if (response.getStatus().equals(keys.getStatus_ok())) {
+            } else if (response.getStatus().equals(statusOkayMsg)) {
                 // success
                 sendMessage = 2;
             } else {
@@ -133,13 +138,13 @@ public class MobileRecharge extends ServiceController {
         if (getter.getBalance(sender)>0) updateSenderBalance();
 
         // updating receiver balance
-        updateReceiverBalance();
+        this.updateReceiverBalance();
     }
 
     @Override
     protected void updateReceiverBalance() throws SQLException {
         GetFromDB getter = Database.getGetter();
-        int providerWallet = getter.getProviderID(providerName);
+        int providerWallet = getter.getProviderID(providerMenu);
         updateReceiverBalance.setInt(1, providerWallet);
         updateReceiverBalance.setDouble(2, amount);
         updateReceiverBalance.setInt(3, providerWallet);

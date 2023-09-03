@@ -19,7 +19,7 @@ public class GetFromDB {
         String getLastSessionQuery = "select * from session_data where sim=? order by last_update DESC";
         String getLastNthInputQuery = "select uinput from session_log where session_id=? order by last_update desc OFFSET ? ROWS FETCH NEXT 1 ROWS ONLY";
         String verifyPINQuery = "select * from passwords where cus_id=? and password=?";
-        String getProviderIDQuery = "select cus_id from customers where name=?";
+        String getProviderIDQuery = "select cus_id from provider where menu=?";
 
         // initialising prepared statements
         getBalance = conn.prepareStatement(getBalanceQuery);
@@ -112,8 +112,8 @@ public class GetFromDB {
         return rs.getString("uinput");
     }
 
-    public int getProviderID(String name) throws SQLException {
-        getProviderIDPS.setString(1, name);
+    public int getProviderID(String menu) throws SQLException {
+        getProviderIDPS.setString(1, menu);
         rs = getProviderIDPS.executeQuery();
         rs.next();
         return rs.getInt("cus_id");

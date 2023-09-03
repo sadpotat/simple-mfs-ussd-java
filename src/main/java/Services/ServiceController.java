@@ -61,9 +61,10 @@ abstract class ServiceController implements Service{
         amount = amount * (1 + tType.getCharges());
     }
 
-    public boolean isAllowed(PrintWriter out) {
+    public boolean isAllowed(HttpServletResponse resp, PrintWriter out) {
         // verifying if the user can make transactions
         if (!senderObj.getStatus().equals("ACTIVE")){
+            resp.setStatus(403);
             out.println("Cannot make transactions, your account is " + senderObj.getStatus());
             out.close();
             return false;
@@ -72,6 +73,7 @@ abstract class ServiceController implements Service{
         // verifying PIN
         int hash = LogController.getLastNthInputInt(sessionID,1);
         if (!verifyPIN(sender, hash)) {
+            resp.setStatus(400);
             out.println("Wrong PIN");
             out.close();
             return false;
@@ -79,6 +81,7 @@ abstract class ServiceController implements Service{
 
         // verifying that the recipient exists
         if (receiverObj == null) {
+            resp.setStatus(400);
             out.println("Recipient is not a registered account");
             out.close();
             return false;
@@ -86,6 +89,7 @@ abstract class ServiceController implements Service{
 
         // checking if a transaction would be allowed
         if (!accountTypesOkay()) {
+            resp.setStatus(403);
             out.println("Transaction not allowed");
             out.close();
             return false;
@@ -93,6 +97,7 @@ abstract class ServiceController implements Service{
 
         // checking if the amount can be transacted
         if (!amountIsInBalance()){
+            resp.setStatus(403);
             out.println("Insufficient balance");
             out.close();
             return false;

@@ -44,7 +44,7 @@ public class ResponseParsers {
         Method method;
         try{
             for (String key: responseMap.keySet()) {
-                String setterName = setters.get(key);
+                String setterName = setters.get(API+key);
                 method = responseBody.getClass().getMethod(setterName, String.class);
                 method.invoke(responseBody, responseMap.get(key));
             }

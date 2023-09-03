@@ -39,7 +39,7 @@ public class SessionController {
         try{
             // running the service
             service.initialiseFromLog();
-            if (service.isAllowed(out)){
+            if (service.isAllowed(resp, out)){
                 service.execute();
                 Database.commitChanges();
                 service.sendSuccessMessage(resp, out);

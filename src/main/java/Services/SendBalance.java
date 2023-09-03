@@ -20,7 +20,7 @@ public class SendBalance extends ServiceController {
     }
 
     @Override
-    public boolean isAllowed(PrintWriter out){
+    public boolean isAllowed(HttpServletResponse resp, PrintWriter out){
         if (verifyPIN(sender, PIN))
             return true;
         out.println("Wrong PIN");
