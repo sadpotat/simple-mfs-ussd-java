@@ -1,5 +1,8 @@
 package Helpers;
 
+import Cache.CacheLoader;
+import Cache.RequestProperties;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -8,18 +11,24 @@ import java.nio.charset.StandardCharsets;
 
 
 public class HTTP {
-    public static HttpURLConnection sendRequest(String content, String API, String reqMethod, String body) throws IOException {
-        URL url = new URL(API);
+    public static HttpURLConnection sendRequest(RequestProperties reqProperties) throws IOException {
+        CacheLoader cache = CacheLoader.getInstance();
+        String urlStr = cache.getUrlFromApiId(reqProperties.getApiId());
+        // creating a httpconnection object and setting its properties
+        URL url = new URL(urlStr);
         URLConnection con = url.openConnection();
         HttpURLConnection http = (HttpURLConnection)con;
-        http.setRequestMethod(reqMethod); // PUT is another valid option
+        http.setRequestMethod(reqProperties.getReqMethod()); // PUT is another valid option
+        http.setRequestProperty("Content-Type", reqProperties.getContentType());
+        http.setConnectTimeout(reqProperties.getTimeout());
         http.setDoOutput(true);
 
-        byte[] out = body.getBytes(StandardCharsets.UTF_8);
+        // the body parameter
+        byte[] out = reqProperties.getBody().getBytes(StandardCharsets.UTF_8);
         int len = out.length;
-
         http.setFixedLengthStreamingMode(len);
-        http.setRequestProperty("Content-Type", content + "; charset=UTF-8");
+
+        // sending the request
         http.connect();
         try(OutputStream os = http.getOutputStream()) {
             os.write(out);

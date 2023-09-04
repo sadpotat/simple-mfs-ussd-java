@@ -19,7 +19,8 @@ public class CacheLoader {
     private HashMap<String, String> menuResponses;
     private HashMap<String, String> serviceClassNames;
     private HashMap<String, HashMap<String, String>> setterNames;
-    private HashMap<String, Provider> providerObjects;
+    private HashMap<String, HashMap<String, String>> getterNames;
+    private HashMap<String, RequestProperties> providerObjects;
     private HashMap<String, Status> statusOkayMessages;
     private HashMap<String, String> APIURLS;
     private static CacheLoader cache;
@@ -34,6 +35,7 @@ public class CacheLoader {
         menuRegex = createMenuRegex();
         statusOkayMessages = createStatusOkayMessages();
         setterNames = createSetterNames();
+        getterNames = createGetterNames();
         APIURLS = createAPIURLS();
     }
 
@@ -63,15 +65,39 @@ public class CacheLoader {
             rs = statement.executeQuery("select key, setter from API_RESPONSE_VALUE_SETTERS where api='" + API + "'");
             HashMap<String, String> keyVals = new HashMap<>();
             while(rs.next()){
-                keyVals.put(API+rs.getString("key"), rs.getString("setter"));
+                keyVals.put(rs.getString("key"), rs.getString("setter"));
             }
             map.put(API, keyVals);
         }
         return map;
     }
 
+    private HashMap<String, HashMap<String, String>> createGetterNames() throws SQLException {
+        ResultSet api = statement.executeQuery("select distinct api from REQUEST_BODY_GETTERS");
+        // list of apis in the table
+        ArrayList<String> apiList = new ArrayList<>();
+        while (api.next()){
+            apiList.add(api.getString("api"));
+        }
+
+        HashMap<String, HashMap<String, String>> map = new HashMap<>();
+        for (String API: apiList){
+            rs = statement.executeQuery("select TEMPLATE_VAL, GETTER from REQUEST_BODY_GETTERS where api='" + API + "'");
+            HashMap<String, String> valGetters = new HashMap<>();
+            while(rs.next()){
+                valGetters.put(rs.getString("TEMPLATE_VAL"), rs.getString("GETTER"));
+            }
+            map.put(API, valGetters);
+        }
+        return map;
+    }
+
     public HashMap<String, String> getSettersForAPI(String API){
         return setterNames.get(API);
+    }
+
+    public HashMap<String, String> getGettersForAPI(String API){
+        return getterNames.get(API);
     }
 
     private HashMap<String, Status> createStatusOkayMessages() throws SQLException {
@@ -107,17 +133,18 @@ public class CacheLoader {
         return map;
     }
 
-    private HashMap<String, Provider> createProviderObjects() throws SQLException {
+    private HashMap<String, RequestProperties> createProviderObjects() throws SQLException {
         rs = statement.executeQuery("select * from provider left join request_data on provider.api_id = request_data.api");
-        HashMap<String, Provider> map = new HashMap<>();
+        HashMap<String, RequestProperties> map = new HashMap<>();
 
         while(rs.next()){
-            Provider provider = new Provider();
-            provider.setApiId(rs.getString("API_ID"));
-            provider.setReqType(rs.getString("req_type"));
-            provider.setReqTemplate(rs.getString("req_template"));
-            provider.setReqMethod(rs.getString("method"));
-            map.put(rs.getString("menu"), provider);
+            RequestProperties reqProperties = new RequestProperties();
+            reqProperties.setApiId(rs.getString("API_ID"));
+            reqProperties.setContentType(rs.getString("content_type"));
+            reqProperties.setBodyTemplate(rs.getString("body_template"));
+            reqProperties.setReqMethod(rs.getString("method"));
+            reqProperties.setTimeout(rs.getInt("timeout"));
+            map.put(rs.getString("menu"), reqProperties);
         }
         return map;
     }
@@ -252,7 +279,7 @@ public class CacheLoader {
     public Status getStatusObj(String API){
         return statusOkayMessages.get(API);
     }
-    public Provider getProviderObj(String menu) {
+    public RequestProperties getProviderObj(String menu) {
         return providerObjects.get(menu);
     }
 

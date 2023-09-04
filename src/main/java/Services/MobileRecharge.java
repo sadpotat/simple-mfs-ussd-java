@@ -1,6 +1,5 @@
 package Services;
 
-import Cache.Status;
 import Controllers.Database;
 import Controllers.LogController;
 import Controllers.Responses;
@@ -9,7 +8,7 @@ import Helpers.ResponseParsers;
 import Middleware.Request.GeneralRequest;
 import Middleware.Response.GeneralResponse;
 import Models.GetFromDB;
-import Cache.Provider;
+import Cache.RequestProperties;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
@@ -19,7 +18,7 @@ import java.sql.SQLException;
 public class MobileRecharge extends ServiceController {
     private final String serviceID = "trns_recharge";
     private String providerMenu;
-    private Provider providerObj;
+    private RequestProperties reqPropertiesObj;
     private String statusOkayMsg;
     private int sendMessage;
     public MobileRecharge(String session_id, int initiator) {
@@ -31,8 +30,8 @@ public class MobileRecharge extends ServiceController {
         int amnt = LogController.getLastNthInputInt(sessionID,2);
         int rec = LogController.getLastNthInputInt(sessionID,3);
         providerMenu = getProviderMenuNo(sessionID);
-        providerObj = cache.getProviderObj(providerMenu);
-        statusOkayMsg = cache.getStatusOkayMsg(providerObj.getApiId());
+        reqPropertiesObj = cache.getProviderObj(providerMenu);
+        statusOkayMsg = cache.getStatusOkayMsg(reqPropertiesObj.getApiId());
 
         updateFields(rec, amnt, serviceID);
     }
@@ -58,8 +57,8 @@ public class MobileRecharge extends ServiceController {
             return false;
         }
 
-        // in case failed to fetch providerObj
-        if (providerObj==null){
+        // in case failed to fetch reqPropertiesObj
+        if (reqPropertiesObj ==null){
             Responses.internalServerError(resp, out);
             return false;
         }
@@ -94,21 +93,19 @@ public class MobileRecharge extends ServiceController {
                 Integer.toString(receiver), Double.toString(amount));
 
         // formatting the object to a String
-        String body = reqBody.getTemplateRequestString(providerObj.getReqTemplate());
+        String body = reqBody.formatReqBodyTemplate(reqPropertiesObj.getApiId(), reqPropertiesObj.getBodyTemplate());
+        reqPropertiesObj.setBody(body);
 
         try{
             // connecting to the telco topup API
-            String content = providerObj.getReqType();
-            String URL = cache.getUrlFromApiId(providerObj.getApiId());
-            String reqMethod = providerObj.getReqMethod();
-            HttpURLConnection http = HTTP.sendRequest(content, URL, reqMethod, body);
+            HttpURLConnection http = HTTP.sendRequest(reqPropertiesObj);
             // converting bytestream response to String
             String resBody = HTTP.convertInputStream2String(http.getInputStream());
 
             // parsing the string into an object
             String contentType = http.getContentType();
             // parsing response to json objects
-            GeneralResponse response = ResponseParsers.parseToJsonObject(providerObj.getApiId(), resBody, contentType);
+            GeneralResponse response = ResponseParsers.parseToJsonObject(reqPropertiesObj.getApiId(), resBody, contentType);
 
             // insert new table in database for success messages and add it to cache //
             if (response==null){

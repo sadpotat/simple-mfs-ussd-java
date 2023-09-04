@@ -1,5 +1,10 @@
 package Middleware.Request;
 
+import Cache.CacheLoader;
+
+import java.lang.reflect.Method;
+import java.util.HashMap;
+
 public class GeneralRequest {
     private String trackingID;
     private String sender;
@@ -45,7 +50,21 @@ public class GeneralRequest {
         this.amount = amount;
     }
 
-    public String getTemplateRequestString(String template){
-        return template.replace("val_1", trackingID).replace("val_2", sender).replace("val_3", receiver).replace("val_4", amount);
+    public String formatReqBodyTemplate(String apiId, String bodyTemplate) {
+        CacheLoader cache = CacheLoader.getInstance();
+        HashMap<String, String> getters = cache.getGettersForAPI(apiId);
+        Method method;
+        try{
+            for (String key: getters.keySet()){
+                String getterName = getters.get(key);
+                method = GeneralRequest.class.getMethod(getterName);
+                String replaceVal = (String) method.invoke(this);
+                bodyTemplate = bodyTemplate.replace(key, replaceVal);
+            }
+            return bodyTemplate;
+        } catch (Exception e) {
+            System.out.println("failed to format body");
+            return null;
+        }
     }
 }
