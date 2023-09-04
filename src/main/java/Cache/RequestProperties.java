@@ -1,12 +1,22 @@
 package Cache;
 
+import java.util.HashMap;
+
 public class RequestProperties {
-    private String ApiId;
     private String bodyTemplate;
-    private String contentType;
     private String reqMethod;
     private String body;
     private int timeout;
+
+    private String url;
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
 
     public String getBody() {
         return body;
@@ -14,6 +24,16 @@ public class RequestProperties {
 
     public void setBody(String body) {
         this.body = body;
+    }
+
+    private HashMap<String, String> Headers;
+
+    public HashMap<String, String> getHeaders() {
+        return Headers;
+    }
+
+    public void setHeaders(HashMap<String, String> headers) {
+        Headers = headers;
     }
 
     public int getTimeout() {
@@ -30,22 +50,6 @@ public class RequestProperties {
 
     public void setReqMethod(String reqMethod) {
         this.reqMethod = reqMethod;
-    }
-
-    public String getApiId() {
-        return ApiId;
-    }
-
-    public void setApiId(String apiId) {
-        this.ApiId = apiId;
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
-
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
     }
 
     public String getBodyTemplate() {

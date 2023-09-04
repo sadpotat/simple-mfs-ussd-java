@@ -11,11 +11,7 @@ public class GeneralRequest {
     private String receiver;
     private String amount;
 
-    public GeneralRequest(String trackingID, String sender, String receiver, String amount) {
-        this.trackingID = trackingID;
-        this.sender = sender;
-        this.receiver = receiver;
-        this.amount = amount;
+    public GeneralRequest() {
     }
 
     public String getTrackingID() {

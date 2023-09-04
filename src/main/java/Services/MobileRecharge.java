@@ -21,6 +21,7 @@ public class MobileRecharge extends ServiceController {
     private RequestProperties reqPropertiesObj;
     private String statusOkayMsg;
     private int sendMessage;
+    private String apiId;
     public MobileRecharge(String session_id, int initiator) {
         super(session_id, initiator);
     }
@@ -30,8 +31,9 @@ public class MobileRecharge extends ServiceController {
         int amnt = LogController.getLastNthInputInt(sessionID,2);
         int rec = LogController.getLastNthInputInt(sessionID,3);
         providerMenu = getProviderMenuNo(sessionID);
-        reqPropertiesObj = cache.getProviderObj(providerMenu);
-        statusOkayMsg = cache.getStatusOkayMsg(reqPropertiesObj.getApiId());
+        apiId = cache.getProviderApiId(providerMenu);
+        reqPropertiesObj = cache.getReqPropObj(apiId);
+        statusOkayMsg = cache.getStatusOkayMsg(apiId);
 
         updateFields(rec, amnt, serviceID);
     }
@@ -89,12 +91,19 @@ public class MobileRecharge extends ServiceController {
         updateBalance();
 
         // creating object to be sent as request
-        GeneralRequest reqBody = new GeneralRequest(sessionID, "myMFS_" + sender,
-                Integer.toString(receiver), Double.toString(amount));
+        GeneralRequest reqBody = new GeneralRequest();
+        reqBody.setTrackingID(sessionID);
+        reqBody.setSender("myMFS_" + sender);
+        reqBody.setReceiver(Integer.toString(receiver));
+        reqBody.setAmount(Double.toString(amount));
 
         // formatting the object to a String
-        String body = reqBody.formatReqBodyTemplate(reqPropertiesObj.getApiId(), reqPropertiesObj.getBodyTemplate());
+        String body = reqBody.formatReqBodyTemplate(apiId, reqPropertiesObj.getBodyTemplate());
         reqPropertiesObj.setBody(body);
+
+        // getting url
+        String urlStr = cache.getUrlFromApiId(apiId);
+        reqPropertiesObj.setUrl(urlStr);
 
         try{
             // connecting to the telco topup API
@@ -105,7 +114,7 @@ public class MobileRecharge extends ServiceController {
             // parsing the string into an object
             String contentType = http.getContentType();
             // parsing response to json objects
-            GeneralResponse response = ResponseParsers.parseToJsonObject(reqPropertiesObj.getApiId(), resBody, contentType);
+            GeneralResponse response = ResponseParsers.parseToJsonObject(apiId, resBody, contentType);
 
             // insert new table in database for success messages and add it to cache //
             if (response==null){

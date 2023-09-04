@@ -20,9 +20,11 @@ public class CacheLoader {
     private HashMap<String, String> serviceClassNames;
     private HashMap<String, HashMap<String, String>> setterNames;
     private HashMap<String, HashMap<String, String>> getterNames;
-    private HashMap<String, RequestProperties> providerObjects;
+    private HashMap<String, HashMap<String, String>> headerMaps;
+    private HashMap<String, RequestProperties> reqPropObjects;
     private HashMap<String, Status> statusOkayMessages;
     private HashMap<String, String> APIURLS;
+    private HashMap<String, String> providerApiIds;
     private static CacheLoader cache;
 
     public CacheLoader() throws SQLException {
@@ -31,12 +33,44 @@ public class CacheLoader {
         modes = createModes();
         menuResponses = createMenuResponses();
         serviceClassNames = createServiceClasses();
-        providerObjects = createProviderObjects();
         menuRegex = createMenuRegex();
         statusOkayMessages = createStatusOkayMessages();
         setterNames = createSetterNames();
         getterNames = createGetterNames();
         APIURLS = createAPIURLS();
+        headerMaps = createHeaderMaps();
+        reqPropObjects = createReqPropObjects();
+
+        providerApiIds = createProviderApiIds();
+    }
+
+    private HashMap<String, String> createProviderApiIds() throws SQLException {
+        rs = statement.executeQuery("select menu, api_id from provider");
+        HashMap<String, String> map = new HashMap<>();
+        while (rs.next()){
+            map.put(rs.getString("menu"), rs.getString("api_id"));
+        }
+        return map;
+    }
+
+    private HashMap<String, HashMap<String, String>> createHeaderMaps() throws SQLException {
+        ResultSet api = statement.executeQuery("select distinct api_id from REQUEST_HEADERS");
+        // list of apis in the table
+        ArrayList<String> apiList = new ArrayList<>();
+        while (api.next()){
+            apiList.add(api.getString("api_id"));
+        }
+
+        HashMap<String, HashMap<String, String>> map = new HashMap<>();
+        for(String API: apiList){
+            rs = statement.executeQuery("select key, value from REQUEST_HEADERS where api_id =" + API);
+            HashMap<String, String> headers = new HashMap<>();
+            while (rs.next()){
+                headers.put(rs.getString("key"), rs.getString("value"));
+            }
+            map.put(API, headers);
+        }
+        return map;
     }
 
     private HashMap<String, String> createAPIURLS() throws SQLException {
@@ -133,20 +167,26 @@ public class CacheLoader {
         return map;
     }
 
-    private HashMap<String, RequestProperties> createProviderObjects() throws SQLException {
-        rs = statement.executeQuery("select * from provider left join request_data on provider.api_id = request_data.api");
+    private HashMap<String, RequestProperties> createReqPropObjects() throws SQLException {
+        rs = statement.executeQuery("select * from request_data");
         HashMap<String, RequestProperties> map = new HashMap<>();
 
-        while(rs.next()){
+        while (rs.next()) {
             RequestProperties reqProperties = new RequestProperties();
-            reqProperties.setApiId(rs.getString("API_ID"));
-            reqProperties.setContentType(rs.getString("content_type"));
             reqProperties.setBodyTemplate(rs.getString("body_template"));
             reqProperties.setReqMethod(rs.getString("method"));
             reqProperties.setTimeout(rs.getInt("timeout"));
-            map.put(rs.getString("menu"), reqProperties);
+
+            HashMap<String, String> headers = getHeadersForApiId(rs.getString("API"));
+            reqProperties.setHeaders(headers);
+
+            map.put(rs.getString("API"), reqProperties);
         }
         return map;
+    }
+
+    private HashMap<String, String> getHeadersForApiId(String apiId) {
+        return headerMaps.get(apiId);
     }
 
     public static CacheLoader getInstance() {
@@ -279,8 +319,8 @@ public class CacheLoader {
     public Status getStatusObj(String API){
         return statusOkayMessages.get(API);
     }
-    public RequestProperties getProviderObj(String menu) {
-        return providerObjects.get(menu);
+    public RequestProperties getReqPropObj(String menu) {
+        return reqPropObjects.get(menu);
     }
 
     public String getXmlResponseRoot(String api) {
@@ -289,5 +329,9 @@ public class CacheLoader {
 
     public String getStatusOkayMsg(String apiId) {
         return statusOkayMessages.get(apiId).getStatus_ok();
+    }
+
+    public String getProviderApiId(String providerMenu) {
+        return providerApiIds.get(providerMenu);
     }
 }
