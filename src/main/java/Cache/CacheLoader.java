@@ -16,11 +16,13 @@ public class CacheLoader {
     private HashMap<String, MenuRoute> menuRoutes;
     private HashMap<String, Regex> menuRegex;
     private HashMap<String, TType> modes;
-    private HashMap<String, String> menuResponses;
+    private HashMap<String, HashMap<String, String>> menuResponses;
     private HashMap<String, String> serviceClassNames;
     private HashMap<String, HashMap<String, String>> setterNames;
     private HashMap<String, HashMap<String, String>> getterNames;
     private HashMap<String, HashMap<String, String>> headerMaps;
+    private HashMap<String, String> accTypesToPage;
+    private HashMap<String, Integer> numEntries;
     private HashMap<String, RequestProperties> reqPropObjects;
     private HashMap<String, Status> statusOkayMessages;
     private HashMap<String, String> APIURLS;
@@ -42,6 +44,25 @@ public class CacheLoader {
         reqPropObjects = createReqPropObjects();
 
         providerApiIds = createProviderApiIds();
+        createPageInfo();
+    }
+
+    private void createPageInfo() throws SQLException {
+        rs = statement.executeQuery("select * from page_list");
+        accTypesToPage = new HashMap<>();
+        numEntries = new HashMap<>();
+        while(rs.next()){
+            accTypesToPage.put(rs.getString("id"), rs.getString("type_to_page"));
+            numEntries.put(rs.getString("id"), rs.getInt("entries"));
+        }
+    }
+
+    public String getAccountsToPage(String id){
+        return accTypesToPage.get(id);
+    }
+
+    public int getEntriesPerPage(String id){
+        return numEntries.get(id);
     }
 
     private HashMap<String, String> createProviderApiIds() throws SQLException {
@@ -235,12 +256,15 @@ public class CacheLoader {
         return map;
     }
 
-    private HashMap<String, String> createMenuResponses() throws SQLException {
+    private HashMap<String, HashMap<String, String>> createMenuResponses() throws SQLException {
         rs = statement.executeQuery("select * from responses");
-        HashMap<String, String> map = new HashMap<>();
+        HashMap<String, HashMap<String, String>> map = new HashMap<>();
 
         while(rs.next()){
-            map.put(rs.getString("menu"),rs.getString("res_str"));
+            HashMap<String, String> response = new HashMap<>();
+            response.put("resString", rs.getString("res_str"));
+            response.put("isPaginated", rs.getString("PAGINATION_REQUIRED"));
+            map.put(rs.getString("menu"), response);
         }
 
         return map;
@@ -273,11 +297,11 @@ public class CacheLoader {
         this.modes = modes;
     }
 
-    public HashMap<String, String> getMenuResponses() {
+    public HashMap<String, HashMap<String, String>> getMenuResponses() {
         return menuResponses;
     }
 
-    public void setMenuResponses(HashMap<String, String> menuResponses) {
+    public void setMenuResponses(HashMap<String, HashMap<String, String>> menuResponses) {
         this.menuResponses = menuResponses;
     }
 
@@ -294,9 +318,12 @@ public class CacheLoader {
     }
 
     public String getResponse(String prevResponse) {
-        return menuResponses.get(prevResponse);
+        return menuResponses.get(prevResponse).get("resString");
     }
 
+    public boolean isPaginated(String menu){
+        return menuResponses.get(menu).get("isPaginated").equals("1");
+    }
     public NextMenuAndID getNextMenu(String prevResponse, String accType, String input) {
         NextMenuAndID nextMenuAndID;
         MenuRoute route;

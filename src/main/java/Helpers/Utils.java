@@ -1,5 +1,10 @@
 package Helpers;
 
+import Controllers.Database;
+import Models.GetFromDB;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -35,5 +40,35 @@ public class Utils {
             builder.append(characters.charAt(rand.nextInt(bound)));
         }
         return builder.toString();
+    }
+
+    public static String generatePage(String typeToPage, int currentPage, int entries) {
+        GetFromDB getter = Database.getGetter();
+        ResultSet rs;
+        try {
+            rs = getter.getClients(typeToPage, currentPage, entries);
+
+            StringBuilder sb = new StringBuilder();
+            int start = 0;
+            while (rs.next()){
+                start++;
+                sb.append(start).append(" ").append(rs.getString("name")).append("\n");
+            }
+
+            if(start == 0) {
+                // indicates that no entries were found
+                sb.append("No items to load");
+                sb.append("\n").append("p previous");
+                return sb.toString();
+            }
+
+            sb.append("\n");
+            sb.append("n next");
+            if (currentPage!=0)
+                sb.append("\n").append("p previous");
+            return sb.toString();
+        } catch (SQLException e) {
+            return null;
+        }
     }
 }

@@ -10,6 +10,15 @@ public class Session {
     private LocalDateTime last_update;
 
     private String serviceID;
+    private int currentPage;
+
+    public int getCurrentPage() {
+        return currentPage;
+    }
+
+    public void setCurrentPage(int currentPage) {
+        this.currentPage = currentPage;
+    }
 
     public String getSession_id() {
         return session_id;

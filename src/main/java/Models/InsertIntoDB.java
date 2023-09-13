@@ -9,6 +9,7 @@ public class InsertIntoDB {
     private final PreparedStatement updateServiceIDPS;
     private final PreparedStatement updateReceiverinTLogPS;
     private final PreparedStatement updateLastInputAndResponsePS;
+    private final PreparedStatement updateCurrentPagePS;
 
     public InsertIntoDB(Connection conn) throws SQLException {
         String createSessionQuery = "insert into session_data(session_id, sim) values(?, ?)";
@@ -17,6 +18,7 @@ public class InsertIntoDB {
         String updateServiceIDQuery = "update session_data set service_id=? where session_id=?";
         String updateReceiverInTLogQuery = "update transactions set receiver_id=? where session_id=?";
         String updateLastInputAndResponseQuery = "update session_data set last_input=?, last_resp=?, last_update=CURRENT_TIMESTAMP where session_id=?";
+        String updateCurrentPageQuery = "update session_data set on_page=on_page+? where session_id=?";
 
         createSessionPS = conn.prepareStatement(createSessionQuery);
         insertIntoLogPS = conn.prepareStatement(insertIntoLogQuery);
@@ -24,6 +26,7 @@ public class InsertIntoDB {
         updateServiceIDPS = conn.prepareStatement(updateServiceIDQuery);
         updateReceiverinTLogPS = conn.prepareStatement(updateReceiverInTLogQuery);
         updateLastInputAndResponsePS = conn.prepareStatement(updateLastInputAndResponseQuery);
+        updateCurrentPagePS = conn.prepareStatement(updateCurrentPageQuery);
     }
 
     public void createSessionEntry(String sessionID, int number) throws SQLException {
@@ -58,4 +61,9 @@ public class InsertIntoDB {
         updatePINPS.executeUpdate();
     }
 
+    public void updateCurrentPage(String sessionID, int offset) throws SQLException {
+        updateCurrentPagePS.setInt(1, offset);
+        updateCurrentPagePS.setString(2, sessionID);
+        updateCurrentPagePS.executeUpdate();
+    }
 }

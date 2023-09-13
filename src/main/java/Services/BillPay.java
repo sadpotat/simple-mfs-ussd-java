@@ -15,8 +15,15 @@ public class BillPay extends ServiceController{
     public void initialiseFromLog() throws SQLException {
         // getting transaction info from log
         int amnt = LogController.getLastNthInputInt(sessionID,2);
-        int rec = LogController.getLastNthInputInt(sessionID,3);
-
+        int chosenBillerInMenu = LogController.getLastNthInputInt(sessionID,3);
+        int totalBillers = getter.getNumberOfCustomersOfType("BILLER");
+        int rec;
+        if(chosenBillerInMenu<=totalBillers)
+            rec = getter.getNthCustomerIdOfType(chosenBillerInMenu, "BILLER");
+        else
+            rec = -1;
         updateFields(rec, amnt, serviceID);
     }
+
+
 }
