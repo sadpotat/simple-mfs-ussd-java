@@ -6,6 +6,7 @@ import Models.InsertIntoDB;
 import Services.*;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.crypto.Data;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -17,10 +18,8 @@ public class SessionController {
         InsertIntoDB insert = Database.getInsert();
         try {
             insert.createSessionEntry(sessionID, initiator);
-            Database.commitChanges();
             return true;
         } catch (SQLException e) {
-            Database.rollbackChanges();
             return false;
         }
     }
@@ -39,25 +38,26 @@ public class SessionController {
         try{
             // running the service
             service.initialiseFromLog();
+            Database.setDbAutoCommit(false);
             if (service.isAllowed(resp, out)){
                 service.execute();
                 Database.commitChanges();
                 service.sendSuccessMessage(resp, out);
             }
         } catch (Exception e) {
+            Database.rollbackChanges();
             Responses.internalServerError(resp, out);
         }
+        Database.setDbAutoCommit(true);
     }
 
     public static boolean updateServiceID(String sessionID, String serviceID) {
         InsertIntoDB insert = Database.getInsert();
         try {
             insert.updateServiceID(sessionID, serviceID);
-            Database.commitChanges();
             return true;
         } catch (SQLException e) {
             System.out.println("failed to update serviceID");
-            Database.rollbackChanges();
             return false;
         }
     }
@@ -66,11 +66,9 @@ public class SessionController {
         InsertIntoDB insert = Database.getInsert();
         try{
             insert.updateLastInputAndResponse(sessionID, input, lastResponse);
-            Database.commitChanges();
             return true;
         } catch (SQLException e) {
             System.out.println("failed to update last response and input");
-            Database.rollbackChanges();
             return false;
         }
     }

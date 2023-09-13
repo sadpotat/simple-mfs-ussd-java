@@ -29,7 +29,6 @@ public class Database {
             String jdbcClassName = "oracle.jdbc.driver.OracleDriver";
             db = Database.getInstance(jdbcClassName, auth.getURL());
             System.out.println("getInstance");
-            db.setAutoCommit(false);
             System.out.println("connected to db");
         } catch (Exception s) {
             System.out.println("failed to connect to db");
@@ -74,6 +73,14 @@ public class Database {
 
     public static void commitChanges() throws SQLException {
         db.commit();
+    }
+
+    public static void setDbAutoCommit(Boolean val){
+        try {
+            db.setAutoCommit(val);
+        } catch (SQLException e) {
+            System.out.println("failed to set autocommit");
+        }
     }
     public static void rollbackChanges() {
         try {

@@ -130,9 +130,8 @@ public class MobileRecharge extends ServiceController {
             // inserting data into transaction table
             // down here because rollback does not affect insertions for some reason
             transact();
-            Database.commitChanges();
         } catch (Exception e) {
-            Database.rollbackChanges();
+            System.out.println("failed to execute mobile recharge");
         }
     }
 

@@ -3,6 +3,7 @@ package Servlets;
 import Cache.CacheLoader;
 import Controllers.*;
 import Helpers.RequestParsers;
+import Helpers.Utils;
 import Models.*;
 
 import javax.servlet.http.HttpServlet;
@@ -10,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 
 public class SessionManager extends HttpServlet {
     @Override
@@ -26,6 +28,7 @@ public class SessionManager extends HttpServlet {
         PrintWriter out = resp.getWriter();
 
         CacheLoader cache = CacheLoader.getInstance();
+        InsertIntoDB insert = Database.getInsert();
 
         if (db==null || cache==null){
             // error handling for when the server fails to connect to the db on servlet initialization
@@ -85,16 +88,26 @@ public class SessionManager extends HttpServlet {
         String accType = user.getType();
 
         // getting the next response menu name
-        NextMenuAndID nextMenuAndID = cache.getNextMenu(prevResponse, accType, input);
+        NextMenuAndID nextMenuAndID;
+        String nextMenu;
+        String serviceID;
 
-        if (nextMenuAndID ==null){
-            // handling errors
-            Responses.internalServerError(resp, out);
-            return;
+        if (input.equals("n") || input.equals("p")){
+            // the last menu is sent again
+            nextMenu = prevResponse;
+            serviceID = session.getServiceID();
+        } else {
+            nextMenuAndID = cache.getNextMenu(prevResponse, accType, input);
+
+            if (nextMenuAndID ==null){
+                // handling errors
+                Responses.internalServerError(resp, out);
+                return;
+            }
+
+            nextMenu = nextMenuAndID.getMenuNo();
+            serviceID = nextMenuAndID.getServiceID();
         }
-
-        String nextMenu = nextMenuAndID.getMenuNo();
-        String serviceID = nextMenuAndID.getServiceID();
 
 //        // updating last response
 //        if(!SessionController.updateLastResponse(sessionID, nextMenu)){
@@ -125,7 +138,22 @@ public class SessionManager extends HttpServlet {
         }
 
         // logging input to db
-        if(!input.equals("") && !LogController.addToLog(sessionID, input)){
+        String inputToLog = input;
+        if(session.getCurrentPage() != -1 && !input.equals("n") && !input.equals("p")){
+            // updates the page number when the user has moved on to the next menu
+            // updates the option chosen to input = option*(1 + current page)
+            String pageId = cache.getResponse(prevResponse);
+            int entries = cache.getEntriesPerPage(pageId);
+            inputToLog =  Integer.toString(Integer.parseInt(input) + session.getCurrentPage() * entries);
+            // updating current page to -1
+            try {
+                insert.updateCurrentPage(sessionID, -(session.getCurrentPage()+1));
+            } catch (SQLException e) {
+                Responses.internalServerError(resp, out);
+                return;
+            }
+        }
+        if(!input.equals("") && !LogController.addToLog(sessionID, inputToLog)){
             // handling errors
             Responses.internalServerError(resp, out);
             return;
@@ -134,17 +162,47 @@ public class SessionManager extends HttpServlet {
         // sending next response
         try {
             String response = cache.getResponse(nextMenu);
-            if (!response.startsWith("/")){
+            if (cache.isPaginated(nextMenu)) {
+                // users to list
+                // for menus that have to be paginated, the response field contains the paginating id
+                String typeToPage = cache.getAccountsToPage(response);
+                // entries per page
+                int entries = cache.getEntriesPerPage(response);
+                // current page
+                int currentPage = session.getCurrentPage();
+                // get max possible pages
+                int totalEntries = getter.getNumberOfCustomersOfType(typeToPage);
+                int maxPageNo =  totalEntries/entries;
+                // update page no.
+                if (input.equals("n") || currentPage==-1){
+                    if(currentPage<maxPageNo){
+                        insert.updateCurrentPage(sessionID, 1);
+                        currentPage++;
+                    }
+                } else{
+                    // input is "p"
+                    if(currentPage==0){
+                        out.println("Invalid input. Please try again.");
+                    } else {
+                        insert.updateCurrentPage(sessionID, -1);
+                        currentPage--;
+                    }
+                }
+                // generate the page
+                String page = Utils.generatePage(typeToPage, currentPage, entries);
+                if (page==null)
+                    Responses.internalServerError(resp, out);
+                else
+                    Responses.sendResponse(page, out);
+            } else if (!response.startsWith("/")){
+                // static message
                 Responses.sendResponse(response, out);
-                return;
+            } else {
+                // responses starting with '/' indicate that a service will run
+                serviceID = serviceID.equals("none") ? session.getServiceID(): serviceID;
+                SessionController.processRequest(resp, out, initiator, sessionID, serviceID);
             }
-
-            // responses starting with '/' indicate that a service will run
-            serviceID = serviceID.equals("none") ? session.getServiceID(): serviceID;
-            SessionController.processRequest(resp, out, initiator, sessionID, serviceID);
-
         } catch (Exception e){
-            Database.rollbackChanges();
             Responses.internalServerError(resp, out);
         }
     }

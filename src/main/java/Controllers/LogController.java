@@ -11,11 +11,9 @@ public class LogController {
         try {
             InsertIntoDB insert = Database.getInsert();
             insert.insertIntoLog(sessionID, input);
-            Database.commitChanges();
             return true;
         } catch (Exception e){
             System.out.println("Error creating log");
-            Database.rollbackChanges();
             return false;
         }
     }
