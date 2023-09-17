@@ -44,17 +44,24 @@ public class CacheLoader {
         reqPropObjects = createReqPropObjects();
 
         providerApiIds = createProviderApiIds();
-        createPageInfo();
+        numEntries = createNumEntries();
+        accTypesToPage = createAccTypesToPage();
     }
 
-    private void createPageInfo() throws SQLException {
+    private HashMap<String, String> createAccTypesToPage() {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("BILL PAYMENT", "BILLER");
+        map.put("EMI PAYMENT", "MERCHANT");
+        return map;
+    }
+
+    private HashMap<String, Integer> createNumEntries() throws SQLException {
         rs = statement.executeQuery("select * from page_list");
-        accTypesToPage = new HashMap<>();
-        numEntries = new HashMap<>();
+        HashMap<String, Integer> map = new HashMap<>();
         while(rs.next()){
-            accTypesToPage.put(rs.getString("id"), rs.getString("type_to_page"));
-            numEntries.put(rs.getString("id"), rs.getInt("entries"));
+            map.put(rs.getString("menu"), rs.getInt("entries"));
         }
+        return map;
     }
 
     public String getAccountsToPage(String id){

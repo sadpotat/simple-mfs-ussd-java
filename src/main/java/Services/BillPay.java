@@ -1,6 +1,10 @@
 package Services;
 
 import Controllers.LogController;
+import Controllers.SessionController;
+import Helpers.RequestParsers;
+import Models.Session;
+
 import java.sql.SQLException;
 
 public class BillPay extends ServiceController{
@@ -16,10 +20,11 @@ public class BillPay extends ServiceController{
         // getting transaction info from log
         int amnt = LogController.getLastNthInputInt(sessionID,2);
         int chosenBillerInMenu = LogController.getLastNthInputInt(sessionID,3);
+
         int totalBillers = getter.getNumberOfCustomersOfType("BILLER");
         int rec;
         if(chosenBillerInMenu<=totalBillers)
-            rec = getter.getNthCustomerIdOfType(chosenBillerInMenu, "BILLER");
+            rec = getter.getNthCustomerIdOfTypeFromOption(chosenBillerInMenu, "BILLER");
         else
             rec = -1;
         updateFields(rec, amnt, serviceID);

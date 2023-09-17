@@ -142,7 +142,7 @@ public class SessionManager extends HttpServlet {
         if(session.getCurrentPage() != -1 && !input.equals("n") && !input.equals("p")){
             // updates the page number when the user has moved on to the next menu
             // updates the option chosen to input = option*(1 + current page)
-            String pageId = cache.getResponse(prevResponse);
+            String pageId = prevResponse;
             int entries = cache.getEntriesPerPage(pageId);
             inputToLog =  Integer.toString(Integer.parseInt(input) + session.getCurrentPage() * entries);
             // updating current page to -1
@@ -164,21 +164,22 @@ public class SessionManager extends HttpServlet {
             String response = cache.getResponse(nextMenu);
             if (cache.isPaginated(nextMenu)) {
                 // users to list
-                // for menus that have to be paginated, the response field contains the paginating id
+                // for menus that have to be paginated, the response field contains the service name
                 String typeToPage = cache.getAccountsToPage(response);
                 // entries per page
-                int entries = cache.getEntriesPerPage(response);
+                int entries = cache.getEntriesPerPage(nextMenu);
                 // current page
                 int currentPage = session.getCurrentPage();
                 // get max possible pages
                 int totalEntries = getter.getNumberOfCustomersOfType(typeToPage);
-                int maxPageNo =  totalEntries/entries;
+                int maxPageNo =  (int) Math.ceil((double)totalEntries/entries);
                 // update page no.
                 if (input.equals("n") || currentPage==-1){
                     if(currentPage<maxPageNo){
                         insert.updateCurrentPage(sessionID, 1);
                         currentPage++;
-                    }
+                    } else
+                        out.println("This is the last page");
                 } else{
                     // input is "p"
                     if(currentPage==0){
@@ -189,7 +190,7 @@ public class SessionManager extends HttpServlet {
                     }
                 }
                 // generate the page
-                String page = Utils.generatePage(typeToPage, currentPage, entries);
+                String page = Utils.generatePage(typeToPage, currentPage, maxPageNo, entries);
                 if (page==null)
                     Responses.internalServerError(resp, out);
                 else

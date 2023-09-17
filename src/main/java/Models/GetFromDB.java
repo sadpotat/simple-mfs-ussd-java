@@ -145,7 +145,7 @@ public class GetFromDB {
         return rs.getInt("total");
     }
 
-    public int getNthCustomerIdOfType(int n, String type) throws SQLException {
+    public int getNthCustomerIdOfTypeFromOption(int n, String type) throws SQLException {
         getNthCustomerOfType.setString(1, type);
         getNthCustomerOfType.setInt(2, n);
         rs = getNthCustomerOfType.executeQuery();

@@ -42,20 +42,20 @@ public class Utils {
         return builder.toString();
     }
 
-    public static String generatePage(String typeToPage, int currentPage, int entries) {
+    public static String generatePage(String typeToPage, int currentPage, int maxPage, int entries) {
         GetFromDB getter = Database.getGetter();
         ResultSet rs;
         try {
             rs = getter.getClients(typeToPage, currentPage, entries);
 
             StringBuilder sb = new StringBuilder();
-            int start = 0;
+            int start = entries*currentPage;
             while (rs.next()){
                 start++;
                 sb.append(start).append(" ").append(rs.getString("name")).append("\n");
             }
 
-            if(start == 0) {
+            if(start == entries*currentPage) {
                 // indicates that no entries were found
                 sb.append("No items to load");
                 sb.append("\n").append("p previous");
@@ -63,7 +63,8 @@ public class Utils {
             }
 
             sb.append("\n");
-            sb.append("n next");
+            if (currentPage<maxPage-1)
+                sb.append("n next");
             if (currentPage!=0)
                 sb.append("\n").append("p previous");
             return sb.toString();
