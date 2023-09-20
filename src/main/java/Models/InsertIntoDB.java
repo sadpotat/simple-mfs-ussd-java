@@ -11,6 +11,8 @@ public class InsertIntoDB {
     private final PreparedStatement updateLastInputAndResponsePS;
     private final PreparedStatement updateCurrentPagePS;
     private final PreparedStatement createTemporaryAccPS;
+    private final PreparedStatement addPinToAccPS;
+    private final PreparedStatement addToBalanceTablePS;
 
     public InsertIntoDB(Connection conn) throws SQLException {
         String createSessionQuery = "insert into session_data(session_id, sim) values(?, ?)";
@@ -20,7 +22,9 @@ public class InsertIntoDB {
         String updateReceiverInTLogQuery = "update transactions set receiver_id=? where session_id=?";
         String updateLastInputAndResponseQuery = "update session_data set last_input=?, last_resp=?, last_update=CURRENT_TIMESTAMP where session_id=?";
         String updateCurrentPageQuery = "update session_data set on_page=on_page+? where session_id=?";
-        String createTemporaryAccountQuery = "insert into customers(cus_id, name, status, type) values(?, 'temp', 'FROZEN', 'PERSONAL')";
+        String createTemporaryAccountQuery = "insert into customers(cus_id, name, status, type) values(?, ?, 'ACTIVE', 'PERSONAL')";
+        String addPinToAccQuery = "insert into passwords(cus_id, password) values(?, ?)";
+        String addToBalanceQuery = "insert into balance(cus_id) values(?)";
 
         createSessionPS = conn.prepareStatement(createSessionQuery);
         insertIntoLogPS = conn.prepareStatement(insertIntoLogQuery);
@@ -30,6 +34,8 @@ public class InsertIntoDB {
         updateLastInputAndResponsePS = conn.prepareStatement(updateLastInputAndResponseQuery);
         updateCurrentPagePS = conn.prepareStatement(updateCurrentPageQuery);
         createTemporaryAccPS = conn.prepareStatement(createTemporaryAccountQuery);
+        addPinToAccPS = conn.prepareStatement(addPinToAccQuery);
+        addToBalanceTablePS = conn.prepareStatement(addToBalanceQuery);
     }
 
     public void createSessionEntry(String sessionID, int number) throws SQLException {
@@ -70,8 +76,20 @@ public class InsertIntoDB {
         updateCurrentPagePS.executeUpdate();
     }
 
-    public void createTemporaryAccount(int initiator) throws SQLException {
+    public void createTemporaryAccount(int initiator, String name) throws SQLException {
         createTemporaryAccPS.setInt(1, initiator);
+        createTemporaryAccPS.setString(2, name);
         createTemporaryAccPS.executeUpdate();
+    }
+
+    public void addPinToAccount(int sender, int pin) throws SQLException {
+        addPinToAccPS.setInt(1,sender);
+        addPinToAccPS.setInt(2,pin);
+        addPinToAccPS.executeUpdate();
+    }
+
+    public void addAccToBalanceTable(int sender) throws SQLException {
+        addToBalanceTablePS.setInt(1, sender);
+        addToBalanceTablePS.executeUpdate();
     }
 }
