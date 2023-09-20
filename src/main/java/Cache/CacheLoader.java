@@ -13,7 +13,7 @@ import java.util.HashMap;
 public class CacheLoader {
     private final Statement statement;
     private ResultSet rs;
-    private HashMap<String, MenuRoute> menuRoutes;
+    private HashMap<String, HashMap<String,MenuRoute>> menuRoutes;
     private HashMap<String, Regex> menuRegex;
     private HashMap<String, TType> modes;
     private HashMap<String, HashMap<String, String>> menuResponses;
@@ -229,20 +229,22 @@ public class CacheLoader {
         }
     }
 
-    private HashMap<String, MenuRoute> createMenuRoutes() throws SQLException {
+    private HashMap<String, HashMap<String, MenuRoute>> createMenuRoutes() throws SQLException {
         rs = statement.executeQuery("select * from menu_routes");
-        HashMap<String, MenuRoute> map = new HashMap<>();
+        HashMap<String, HashMap<String, MenuRoute>> map = new HashMap<>();
         MenuRoute menuRoute;
 
         while(rs.next()){
-            menuRoute = new MenuRoute(rs.getString("account_type"),
-                    rs.getString("next_response"),
+            if(!map.containsKey(rs.getString("account_type"))){
+                HashMap<String, MenuRoute> map2 = new HashMap<>();
+                map.put(rs.getString("account_type"), map2);
+            }
+            menuRoute = new MenuRoute(rs.getString("next_response"),
                     rs.getString("service_id"));
             // the key is a "prevResponse userInput" string
-            map.put(rs.getString("prev_response") + " " + rs.getString("uinput"),
+            map.get(rs.getString("account_type")).put(rs.getString("prev_response") + " " + rs.getString("uinput"),
                     menuRoute);
         }
-
         return map;
     }
 
@@ -288,11 +290,11 @@ public class CacheLoader {
         return map;
     }
 
-    public HashMap<String, MenuRoute> getMenuRoutes() {
+    public HashMap<String, HashMap<String, MenuRoute>> getMenuRoutes() {
         return menuRoutes;
     }
 
-    public void setMenuRoutes(HashMap<String, MenuRoute> menuRoutes) {
+    public void setMenuRoutes(HashMap<String, HashMap<String, MenuRoute>> menuRoutes) {
         this.menuRoutes = menuRoutes;
     }
 
@@ -334,9 +336,9 @@ public class CacheLoader {
     public NextMenuAndID getNextMenu(String prevResponse, String accType, String input) {
         NextMenuAndID nextMenuAndID;
         MenuRoute route;
-        route = menuRoutes.get(prevResponse + " " + input);
+        route = menuRoutes.get(accType).get(prevResponse + " " + input);
         if (route==null)
-            route = menuRoutes.get(prevResponse + " -1");
+            route = menuRoutes.get(accType).get(prevResponse + " -1");
 
         nextMenuAndID = new NextMenuAndID(route.getNextResponse(), route.getServiceID());
         return nextMenuAndID;

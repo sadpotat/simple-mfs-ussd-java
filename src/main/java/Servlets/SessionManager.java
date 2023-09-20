@@ -49,6 +49,14 @@ public class SessionManager extends HttpServlet {
                 Responses.internalServerError(resp, out);
                 return;
             }
+//            // verifies if the initiator is a registered account
+//            if(SessionController.userIsNotRegistered(initiator)){
+//                try {
+//                    insert.createTemporaryAccount(initiator);
+//                } catch (SQLException e) {
+//                    Responses.internalServerError(resp, out);
+//                }
+//            }
         }
 
         // getting session data

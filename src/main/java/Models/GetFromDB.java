@@ -59,16 +59,16 @@ public class GetFromDB {
             rs = getCustomerPS.executeQuery();
             if (rs.next()) {
                 try {
-                    customer.setCus_id(rs.getInt("cus_id"));
+                    customer.setCus_id(ID);
                     customer.setName(rs.getString("name"));
                     customer.setType(rs.getString("type"));
                     customer.setStatus(rs.getString("status"));
                     customer.setBalance(getBalance(rs.getInt("cus_id")));
-                    return customer;
                 } catch (Exception e) {
                     System.out.println("failed to get customer");
                 }
             }
+            return customer;
         } catch (SQLException s){
             System.out.println("Could not execute PreparedStatements in getCustomer");
         }
