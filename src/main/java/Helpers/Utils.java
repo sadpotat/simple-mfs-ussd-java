@@ -1,5 +1,6 @@
 package Helpers;
 
+import Cache.CacheLoader;
 import Controllers.Database;
 import Models.GetFromDB;
 
@@ -44,11 +45,12 @@ public class Utils {
 
     public static String generatePage(String typeToPage, int currentPage, int maxPage, int entries) {
         GetFromDB getter = Database.getGetter();
+        CacheLoader cache = CacheLoader.getInstance();
         ResultSet rs;
         try {
             rs = getter.getClients(typeToPage, currentPage, entries);
-
             StringBuilder sb = new StringBuilder();
+            sb.append(cache.getChooseOptionTextForPage(typeToPage)).append("\n");
             int start = entries*currentPage;
             while (rs.next()){
                 start++;

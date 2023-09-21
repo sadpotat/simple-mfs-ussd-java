@@ -2,8 +2,6 @@ package Services;
 
 import Controllers.Database;
 import Controllers.LogController;
-import Controllers.SessionController;
-import Models.GetFromDB;
 import Models.InsertIntoDB;
 
 import javax.servlet.http.HttpServletResponse;

@@ -370,4 +370,12 @@ public class CacheLoader {
     public String getProviderApiId(String providerMenu) {
         return providerApiIds.get(providerMenu);
     }
+
+    public String getChooseOptionTextForPage(String typeToPage) {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("BILLER", "Choose a biller:");
+        map.put("MERCHANT", "Choose a merchant:");
+
+        return map.get(typeToPage);
+    }
 }
