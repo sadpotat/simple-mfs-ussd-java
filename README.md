@@ -3,7 +3,7 @@
 This is a simple implementation of a USSD Web API for an MFS using Java SE. I tried to use as few frameworks I could to improve my understanding of the language. 
 
 ## Data Storage
-All data is stored in a database on the server-side, including all menus, response messages, and customer data for the DFS. DDL files for a dummy database are provided in the repository.
+All menus, response messages, request parameters and customer data for the financial service are stored in a database on the server-side. DDL files for a dummy database are provided in the repository.
 
 ## Using the API
 App URL: `tomcat_server/WAR_context/ussd?initiator=customer_id&input=user_input` 
@@ -33,7 +33,7 @@ Every feature of the application is treated as a service. To add a new service, 
 The menus leading to the service must be added in the `MENU_ROUTES` and `RESPONSES` tables. The regular expressions for the expected input at every step has to be added to the `MENU_REGEX` table. Finally, to dynamically load the class, add the class name (including its package) to the `SERVICE_CLASSES` table.
 
 ## Caching
-No caching framework was used. On servlet initialisation, the `CacheLoader` class fetches all static tables(tables that won't change unless a new service is added) from the database and stores them as `HashMap` objects in RAM. `CacheLoader` is a singleton class so whenever a cached information is required, the same objects are called from its running instance. 
+In-memory caching is used. On servlet initialisation, the `CacheLoader` class fetches all static and rarely updated tables from the database and stores them as `HashMap` objects in memory. `CacheLoader` is a singleton class so whenever a cached information is required, the same objects are called from its running instance. 
 
 To update caches while the server is running, hit the URL for the `CacheReloader` servlet. 
 
